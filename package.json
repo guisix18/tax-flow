@@ -1,0 +1,26 @@
+{
+  "name": "tax-flow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tax Flow - Monorepo",
+  "packageManager": "npm@10.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "dev:backend": "npm run dev --workspace=@tax-flow/backend",
+    "dev:mobile": "npm run start --workspace=@tax-flow/mobile",
+    "prisma:migrate": "npm run prisma:migrate --workspace=@tax-flow/backend",
+    "prisma:studio": "npm run prisma:studio --workspace=@tax-flow/backend"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "turbo": "^2.8.3",
+    "typescript": "^5.9.3"
+  }
+}

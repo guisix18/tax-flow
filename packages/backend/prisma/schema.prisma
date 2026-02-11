@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Company {
+  id             Int      @id @default(autoincrement())
+  name           String
+  cnpj           String?  @unique
+  created_at     DateTime @default(now())
+  updated_at     DateTime? 
+
+  serviceOrders  ServiceOrder[]
+}
+
+model ServiceOrder {
+  id                   Int              @id @default(autoincrement())
+  company_id           Int
+  service_name         String
+  amount               Int
+  
+  due_date             DateTime
+  service_status       ServiceStatus    @default(PENDING)
+  note_issued          Boolean          @default(false)
+  notified             Boolean          @default(false)
+  notification_count   Int              @default(0)
+  last_notification_at DateTime?
+  
+  created_at           DateTime         @default(now())
+  updated_at           DateTime?
+  company              Company          @relation(fields: [company_id], references: [id])
+}
+
+
+enum ServiceStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
