@@ -1,3 +1,4 @@
+import { paginationMetaSchema } from "@/helpers/pagination";
 import z from "zod";
 
 export const createCompanySchema = z.object({
@@ -6,6 +7,11 @@ export const createCompanySchema = z.object({
     .min(1, "Name is required")
     .max(255, "Name must be at most 255 characters"),
   cnpj: z.string().optional(),
+});
+
+export const getCompaniesQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  ipp: z.coerce.number().int().positive().max(100).default(20),
 });
 
 export const companyResponseSchema = z.object({
@@ -18,4 +24,5 @@ export const companyResponseSchema = z.object({
 
 export const companiesResponseSchema = z.object({
   rows: z.array(companyResponseSchema),
+  pagination: paginationMetaSchema,
 });

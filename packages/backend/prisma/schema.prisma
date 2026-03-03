@@ -36,6 +36,9 @@ model ServiceOrder {
   created_at           DateTime         @default(now())
   updated_at           DateTime?
   company              Company          @relation(fields: [company_id], references: [id])
+
+  @@index([company_id])
+  @@index([note_issued, due_date])
 }
 
 

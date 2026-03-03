@@ -21,6 +21,23 @@ export async function createServiceOrder(
     };
   }
 
+  const alreadyExistingServiceOrder = await prisma.serviceOrder.findFirst({
+    where: {
+      company_id,
+      service_name,
+      due_date,
+    },
+  });
+
+  if (alreadyExistingServiceOrder) {
+    return {
+      success: false,
+      error: { type: "SERVICE_ORDER_ALREADY_EXISTS_ERROR" },
+      message:
+        "A service order with the same company, service name and due date already exists",
+    };
+  }
+
   const newServiceOrder = await prisma.serviceOrder.create({
     data: {
       amount,

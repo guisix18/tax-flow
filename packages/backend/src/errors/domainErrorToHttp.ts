@@ -10,5 +10,11 @@ export function domainErrorToHttp(error: DomainError): {
       return { status: 409 };
     case "COMPANY_NOT_FOUND_ERROR":
       return { status: 404 };
+    case "SERVICE_ORDER_NOT_FOUND_ERROR":
+      return { status: 404 };
+    case "SERVICE_ORDER_ALREADY_EXISTS_ERROR":
+      return { status: 409 };
+    case "SERVICE_ORDER_ALREADY_ISSUED_ERROR":
+      return { status: 409 };
   }
 }

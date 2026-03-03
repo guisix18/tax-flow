@@ -11,6 +11,7 @@ export interface CompanyCreateInput {
   cnpj?: string | null;
 }
 
-export interface CompaniesResponse {
-  rows: Company[];
+export interface CompanyInServiceOrderByIdResponse {
+  company_name: string;
+  company_cnpj: string | null;
 }

@@ -9,7 +9,7 @@ export async function createCompany(
   let existingCompany: Company | null = null;
   let isCnpjValid: boolean | null = data.cnpj ? cnpj.isValid(data.cnpj) : null;
 
-  if (!isCnpjValid) {
+  if (data.cnpj && !isCnpjValid) {
     return {
       success: false,
       error: { type: "INVALID_CNPJ_ERROR" },

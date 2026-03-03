@@ -1,11 +1,23 @@
-import { CompaniesResponse } from "@/types/company";
+import { PaginatedResult, PaginationParams, Result } from "@/types/common";
+import { Company } from "@/types/company";
 import { prisma } from "../../lib/prisma";
+import { buildPaginationArgs, buildPaginationMeta } from "@/helpers/pagination";
 
-//Acho que a pessoa não vai cadastrar muito, então tá de boa não tem paginação
-export async function getCompanies(): Promise<CompaniesResponse> {
-  const companies = await prisma.company.findMany();
+export async function getCompanies(
+  pagination: PaginationParams,
+): Promise<Result<PaginatedResult<Company>>> {
+  const { skip, take } = buildPaginationArgs(pagination);
+
+  const [companies, total] = await Promise.all([
+    prisma.company.findMany({ skip, take }),
+    prisma.company.count(),
+  ]);
 
   return {
-    rows: companies,
+    success: true,
+    data: {
+      rows: companies,
+      pagination: buildPaginationMeta(total, pagination),
+    },
   };
 }
