@@ -86,8 +86,8 @@ Dois canais estão previstos:
 | 2 | CRUD básico: criar/listar empresas, criar/listar/obter/atualizar ordens | Concluída |
 | 3 | Marcação de nota emitida (`PATCH /service-orders/:id/mark-issued`) | Concluída |
 | 4 | **Multi-tenancy**: modelo `User`, auth JWT, escopo de todas as rotas existentes | Em andamento |
-| 5 | **Listagem de pendentes** (`GET /service-orders/upcoming?days=N`) | Em andamento |
-| 6 | Envio real de e-mail (nodemailer + SMTP) e endpoint de disparo manual | Planejada |
+| 5 | **Listagem de pendentes** (`GET /service-orders/upcoming?days=N`) | Concluída |
+| 6 | Envio real de e-mail (nodemailer + SMTP) e endpoint de disparo manual | Concluída |
 | 7 | Job agendado varrendo ordens próximas do vencimento e disparando e-mail | Planejada |
 | 8 | Frontend (pacote `@tax-flow/mobile`) consumindo os endpoints autenticados | Planejada |
 | 9 | Cadastro real do piloto e coleta de feedback | Planejada |
@@ -117,7 +117,11 @@ Dois canais estão previstos:
 
 - `DATABASE_URL` — string de conexão Postgres.
 - `JWT_SECRET` — segredo para assinar tokens JWT. Gerar com `openssl rand -hex 32`.
-- `SMTP_*` — credenciais SMTP (na etapa de envio de e-mail).
+- `SMTP_HOST` — servidor SMTP (ex.: `smtp.gmail.com`).
+- `SMTP_PORT` — porta SMTP (default `587`; use `465` para SSL).
+- `SMTP_USER` — usuário/e-mail do provedor (ex.: `conta@gmail.com`).
+- `SMTP_PASS` — senha de aplicativo do provedor (no Gmail, App Password de 16 caracteres).
+- `MAIL_FROM` — remetente exibido no e-mail (opcional; default = `SMTP_USER`).
 
 ### Recursos humanos
 
@@ -187,6 +191,30 @@ Esta seção é atualizada ao final de cada iteração relevante. Registra:
 ## 11. Changelog do código
 
 Registro, em ordem cronológica reversa, das alterações de código relevantes para a entrega acadêmica. Cada entrada explica **o quê**, **onde** e **por quê**.
+
+### 2026-04-13 — CI no GitHub Actions + envio de lembrete por e-mail
+
+**O quê:**
+- Workflow de CI em `.github/workflows/ci.yml` que roda `typecheck` (`tsc --noEmit`) e `vitest` em cada push para `main` e PRs para `main`, usando Node 24 LTS.
+- Feature de envio de lembrete de emissão de nota fiscal por **e-mail SMTP**, via `nodemailer`. Destinatário: e-mail do `User` dono da ordem.
+- Endpoint manual `POST /service-orders/:id/send-reminder` (autenticado, escopo multi-tenant), que envia o e-mail e atualiza os campos `notified`, `notification_count` e `last_notification_at` do `ServiceOrder`.
+- Regras de negócio: 404 se a ordem não pertence ao usuário; 409 se a nota já foi emitida (`SERVICE_ORDER_ALREADY_ISSUED_ERROR` agora em uso).
+- 4 novos testes unitários com `nodemailer` mockado cobrindo os caminhos felizes e de erro.
+
+**Arquivos afetados (criados):**
+- `.github/workflows/ci.yml`
+- `packages/backend/src/lib/mailer.ts` — abstração SMTP (singleton de `Transporter`, lê env vars SMTP_HOST/PORT/USER/PASS, suporta porta 465 SSL ou 587 STARTTLS).
+- `packages/backend/src/services/serviceOrder/sendServiceOrderReminder.ts`
+- `packages/backend/src/__tests__/services/serviceOrder/sendServiceOrderReminder.test.ts`
+
+**Arquivos afetados (modificados):**
+- `packages/backend/package.json` — novas deps `nodemailer` e `@types/nodemailer`.
+- `packages/backend/src/routes/serviceOrder/serviceOrder.routes.ts` — nova rota `POST /:id/send-reminder`.
+- `.gitignore` — ignora `.turbo/` e `.vscode/`.
+
+**Motivação:** o sistema só entrega valor real quando o usuário recebe o lembrete no canal que ele usa (e-mail). Com o endpoint manual, o amigo PJ pode validar o fluxo completo desde já, e a próxima etapa (job agendado que dispara automaticamente próximo ao vencimento) reaproveita toda essa infraestrutura. O CI, por sua vez, protege `main` de regressões agora que o projeto já tem várias camadas (multi-tenancy, auth, e-mail) — qualquer PR futuro roda os 26 testes antes do merge.
+
+**Variáveis de ambiente novas:** `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` (opcional). Para Gmail, é necessário habilitar 2FA e gerar uma **App Password** em https://myaccount.google.com/apppasswords.
 
 ### 2026-04-13 — Multi-tenancy (auth JWT) + listagem de ordens pendentes
 

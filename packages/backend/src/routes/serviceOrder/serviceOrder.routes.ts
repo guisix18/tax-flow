@@ -15,6 +15,7 @@ import { getServiceOrderById } from "@/services/serviceOrder/getServiceOrderById
 import { updateServiceOrder } from "@/services/serviceOrder/updateServiceOrder";
 import { markServiceOrderIssued } from "@/services/serviceOrder/markServiceOrderIssued";
 import { getUpcomingServiceOrders } from "@/services/serviceOrder/getUpcomingServiceOrders";
+import { sendServiceOrderReminder } from "@/services/serviceOrder/sendServiceOrderReminder";
 
 export function serviceOrderRoutes(app: FastifyInstance): void {
   app.post(
@@ -145,6 +146,26 @@ export function serviceOrderRoutes(app: FastifyInstance): void {
       const userId = request.user.sub;
 
       const result = await markServiceOrderIssued(id, userId);
+
+      return sendResult(reply, result, 204);
+    },
+  );
+
+  app.post(
+    "/service-orders/:id/send-reminder",
+    {
+      onRequest: [app.authenticate],
+      schema: {
+        params: getServiceOrderByIdParamsSchema,
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as z.infer<
+        typeof getServiceOrderByIdParamsSchema
+      >;
+      const userId = request.user.sub;
+
+      const result = await sendServiceOrderReminder(id, userId);
 
       return sendResult(reply, result, 204);
     },
