@@ -22,10 +22,20 @@ type ServiceOrderAlreadyIssuedError = {
   type: "SERVICE_ORDER_ALREADY_ISSUED_ERROR";
 };
 
+type UserAlreadyExistsError = {
+  type: "USER_ALREADY_EXISTS_ERROR";
+};
+
+type InvalidCredentialsError = {
+  type: "INVALID_CREDENTIALS_ERROR";
+};
+
 export type DomainError =
   | CompanyInvalidCnpjError
   | CompanyAlreadyExistsError
   | CompanyNotFoundError
   | ServiceOrderAlreadyExistsError
   | ServiceOrderNotFoundError
-  | ServiceOrderAlreadyIssuedError;
+  | ServiceOrderAlreadyIssuedError
+  | UserAlreadyExistsError
+  | InvalidCredentialsError;

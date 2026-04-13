@@ -4,10 +4,12 @@ import { ServiceOrderByIdResponse } from "@/types/serviceOrder";
 
 export async function getServiceOrderById(
   id: number,
+  userId: number,
 ): Promise<Result<ServiceOrderByIdResponse>> {
-  const serviceOrder = await prisma.serviceOrder.findUnique({
+  const serviceOrder = await prisma.serviceOrder.findFirst({
     where: {
       id,
+      company: { user_id: userId },
     },
     include: {
       company: true,

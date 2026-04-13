@@ -5,10 +5,12 @@ import { ServiceOrderInput } from "@/types/serviceOrder";
 export async function updateServiceOrder(
   data: Partial<ServiceOrderInput>,
   id: number,
+  userId: number,
 ): Promise<Result<void>> {
-  const serviceOrder = await prisma.serviceOrder.findUnique({
+  const serviceOrder = await prisma.serviceOrder.findFirst({
     where: {
       id,
+      company: { user_id: userId },
     },
   });
 

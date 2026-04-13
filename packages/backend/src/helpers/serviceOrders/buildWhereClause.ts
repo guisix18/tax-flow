@@ -4,8 +4,11 @@ import { Prisma } from "prisma/generated/client";
 //Porcaria, refatorar depois
 export function buildWhereClause(
   filters: ServiceOrderFilters,
+  userId: number,
 ): Prisma.ServiceOrderWhereInput {
-  const where: Prisma.ServiceOrderWhereInput = {};
+  const where: Prisma.ServiceOrderWhereInput = {
+    company: { user_id: userId },
+  };
 
   if (filters.company_id) {
     where.company_id = filters.company_id;

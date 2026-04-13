@@ -5,6 +5,7 @@ import { cnpj } from "cpf-cnpj-validator";
 
 export async function createCompany(
   data: CompanyCreateInput,
+  userId: number,
 ): Promise<Result<RecordWithId>> {
   let existingCompany: Company | null = null;
   let isCnpjValid: boolean | null = data.cnpj ? cnpj.isValid(data.cnpj) : null;
@@ -35,6 +36,7 @@ export async function createCompany(
     data: {
       name: data.name,
       cnpj: isCnpjValid ? data.cnpj : null,
+      user_id: userId,
     },
   });
 

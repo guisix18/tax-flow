@@ -4,12 +4,14 @@ import { ServiceOrderInput } from "@/types/serviceOrder";
 
 export async function createServiceOrder(
   data: ServiceOrderInput,
+  userId: number,
 ): Promise<Result<RecordWithId>> {
   const { amount, company_id, due_date, service_name } = data;
 
-  const company = await prisma.company.findUnique({
+  const company = await prisma.company.findFirst({
     where: {
       id: company_id,
+      user_id: userId,
     },
   });
 

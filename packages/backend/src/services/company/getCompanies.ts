@@ -5,12 +5,13 @@ import { buildPaginationArgs, buildPaginationMeta } from "@/helpers/pagination";
 
 export async function getCompanies(
   pagination: PaginationParams,
+  userId: number,
 ): Promise<Result<PaginatedResult<Company>>> {
   const { skip, take } = buildPaginationArgs(pagination);
 
   const [companies, total] = await Promise.all([
-    prisma.company.findMany({ skip, take }),
-    prisma.company.count(),
+    prisma.company.findMany({ where: { user_id: userId }, skip, take }),
+    prisma.company.count({ where: { user_id: userId } }),
   ]);
 
   return {

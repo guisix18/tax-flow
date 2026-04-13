@@ -15,7 +15,7 @@ export const createServiceOrderSchema = z.object({
       message: "Amount must be at least 100(1,00 in cents)",
     }),
 
-  due_date: z.date().refine(validateFutureDate, {
+  due_date: z.coerce.date().refine(validateFutureDate, {
     message: "Due date must be within the next year",
   }),
 
@@ -64,7 +64,7 @@ export const updateServiceOrderSchema = z.object({
     })
     .optional(),
 
-  due_date: z
+  due_date: z.coerce
     .date()
     .refine(validateFutureDate, {
       message: "Due date must be within the next year",
@@ -74,6 +74,12 @@ export const updateServiceOrderSchema = z.object({
 
 export const getServiceOrderByIdParamsSchema = z.object({
   id: z.coerce.number(),
+});
+
+export const getUpcomingServiceOrdersQuerySchema = z.object({
+  days: z.coerce.number().int().min(1).max(90).default(7),
+  page: z.coerce.number().int().positive().default(1),
+  ipp: z.coerce.number().int().positive().max(100).default(20),
 });
 
 export const serviceOrderListItemSchema = z.object({

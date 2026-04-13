@@ -13,6 +13,7 @@ export function companyRoutes(app: FastifyInstance): void {
   app.get(
     "/companies",
     {
+      onRequest: [app.authenticate],
       schema: {
         querystring: getCompaniesQuerySchema,
         response: {
@@ -24,8 +25,9 @@ export function companyRoutes(app: FastifyInstance): void {
       const { page, ipp } = request.query as z.infer<
         typeof getCompaniesQuerySchema
       >;
+      const userId = request.user.sub;
 
-      const result = await getCompanies({ page, ipp });
+      const result = await getCompanies({ page, ipp }, userId);
 
       return sendResult(reply, result);
     },
@@ -34,6 +36,7 @@ export function companyRoutes(app: FastifyInstance): void {
   app.post(
     "/companies",
     {
+      onRequest: [app.authenticate],
       schema: {
         body: createCompanySchema,
         response: {
@@ -43,8 +46,9 @@ export function companyRoutes(app: FastifyInstance): void {
     },
     async (request, reply) => {
       const body = request.body as z.infer<typeof createCompanySchema>;
+      const userId = request.user.sub;
 
-      const result = await createCompany(body);
+      const result = await createCompany(body, userId);
 
       return sendResult(reply, result, 201);
     },

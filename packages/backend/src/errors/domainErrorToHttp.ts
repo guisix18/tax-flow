@@ -16,5 +16,9 @@ export function domainErrorToHttp(error: DomainError): {
       return { status: 409 };
     case "SERVICE_ORDER_ALREADY_ISSUED_ERROR":
       return { status: 409 };
+    case "USER_ALREADY_EXISTS_ERROR":
+      return { status: 409 };
+    case "INVALID_CREDENTIALS_ERROR":
+      return { status: 401 };
   }
 }

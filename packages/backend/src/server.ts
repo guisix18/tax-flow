@@ -10,7 +10,9 @@ import { fastifyCors } from "@fastify/cors";
 import ScalarApiReference from "@scalar/fastify-api-reference";
 import { companyRoutes } from "./routes/company/company.routes";
 import errorHandler from "./plugins/errorHandler";
+import authPlugin from "./plugins/auth";
 import { serviceOrderRoutes } from "./routes/serviceOrder/serviceOrder.routes";
+import { authRoutes } from "./routes/auth/auth.routes";
 
 const app: FastifyInstance = fastify({
   logger: true,
@@ -38,6 +40,8 @@ async function taxFlowBootstrap() {
     routePrefix: "/docs",
   });
   app.register(errorHandler);
+  await app.register(authPlugin);
+  app.register(authRoutes);
   app.register(companyRoutes);
   app.register(serviceOrderRoutes);
 

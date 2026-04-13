@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.3.0",
   "engineVersion": "9d6ad21cbbceab97458517b147a6a09ff43aa735",
   "activeProvider": "postgresql",
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"./generated\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Company {\n  id         Int       @id @default(autoincrement())\n  name       String\n  cnpj       String?   @unique\n  created_at DateTime  @default(now())\n  updated_at DateTime?\n\n  serviceOrders ServiceOrder[]\n}\n\nmodel ServiceOrder {\n  id           Int    @id @default(autoincrement())\n  company_id   Int\n  service_name String\n  amount       Int\n\n  due_date             DateTime\n  service_status       String    @default(\"pending\")\n  note_issued          Boolean   @default(false)\n  notified             Boolean   @default(false)\n  notification_count   Int       @default(0)\n  last_notification_at DateTime?\n\n  created_at DateTime  @default(now())\n  updated_at DateTime?\n  company    Company   @relation(fields: [company_id], references: [id])\n}\n",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"./generated\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id            Int       @id @default(autoincrement())\n  name          String\n  email         String    @unique\n  password_hash String\n  created_at    DateTime  @default(now())\n  updated_at    DateTime?\n\n  companies Company[]\n}\n\nmodel Company {\n  id         Int       @id @default(autoincrement())\n  name       String\n  cnpj       String?   @unique\n  user_id    Int\n  created_at DateTime  @default(now())\n  updated_at DateTime?\n\n  user          User           @relation(fields: [user_id], references: [id])\n  serviceOrders ServiceOrder[]\n\n  @@index([user_id])\n}\n\nmodel ServiceOrder {\n  id           Int    @id @default(autoincrement())\n  company_id   Int\n  service_name String\n  amount       Int\n\n  due_date             DateTime\n  service_status       ServiceStatus @default(PENDING)\n  note_issued          Boolean       @default(false)\n  notified             Boolean       @default(false)\n  notification_count   Int           @default(0)\n  last_notification_at DateTime?\n\n  created_at DateTime  @default(now())\n  updated_at DateTime?\n  company    Company   @relation(fields: [company_id], references: [id])\n\n  @@index([company_id])\n  @@index([note_issued, due_date])\n}\n\nenum ServiceStatus {\n  PENDING\n  IN_PROGRESS\n  COMPLETED\n  CANCELLED\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -28,7 +28,7 @@ const config: runtime.GetPrismaClientConfig = {
   }
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Company\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"cnpj\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updated_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"serviceOrders\",\"kind\":\"object\",\"type\":\"ServiceOrder\",\"relationName\":\"CompanyToServiceOrder\"}],\"dbName\":null},\"ServiceOrder\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"company_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"service_name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"due_date\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"service_status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"note_issued\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"notified\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"notification_count\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"last_notification_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updated_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"company\",\"kind\":\"object\",\"type\":\"Company\",\"relationName\":\"CompanyToServiceOrder\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password_hash\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updated_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"companies\",\"kind\":\"object\",\"type\":\"Company\",\"relationName\":\"CompanyToUser\"}],\"dbName\":null},\"Company\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"cnpj\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updated_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"CompanyToUser\"},{\"name\":\"serviceOrders\",\"kind\":\"object\",\"type\":\"ServiceOrder\",\"relationName\":\"CompanyToServiceOrder\"}],\"dbName\":null},\"ServiceOrder\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"company_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"service_name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"due_date\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"service_status\",\"kind\":\"enum\",\"type\":\"ServiceStatus\"},{\"name\":\"note_issued\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"notified\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"notification_count\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"last_notification_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updated_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"company\",\"kind\":\"object\",\"type\":\"Company\",\"relationName\":\"CompanyToServiceOrder\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 
 async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Module> {
   const { Buffer } = await import('node:buffer')
@@ -60,8 +60,8 @@ export interface PrismaClientConstructor {
    * @example
    * ```
    * const prisma = new PrismaClient()
-   * // Fetch zero or more Companies
-   * const companies = await prisma.company.findMany()
+   * // Fetch zero or more Users
+   * const users = await prisma.user.findMany()
    * ```
    * 
    * Read more in our [docs](https://pris.ly/d/client).
@@ -82,8 +82,8 @@ export interface PrismaClientConstructor {
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more Companies
- * const companies = await prisma.company.findMany()
+ * // Fetch zero or more Users
+ * const users = await prisma.user.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -177,6 +177,16 @@ export interface PrismaClient<
   }>>
 
       /**
+   * `prisma.user`: Exposes CRUD operations for the **User** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Users
+    * const users = await prisma.user.findMany()
+    * ```
+    */
+  get user(): Prisma.UserDelegate<ExtArgs, { omit: OmitOpts }>;
+
+  /**
    * `prisma.company`: Exposes CRUD operations for the **Company** model.
     * Example usage:
     * ```ts

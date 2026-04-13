@@ -2,6 +2,7 @@ export interface Company {
   id: number;
   name: string;
   cnpj: string | null;
+  user_id: number;
   created_at: Date;
   updated_at: Date | null;
 }

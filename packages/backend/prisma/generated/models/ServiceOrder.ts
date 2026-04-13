@@ -46,7 +46,7 @@ export type ServiceOrderMinAggregateOutputType = {
   service_name: string | null
   amount: number | null
   due_date: Date | null
-  service_status: string | null
+  service_status: $Enums.ServiceStatus | null
   note_issued: boolean | null
   notified: boolean | null
   notification_count: number | null
@@ -61,7 +61,7 @@ export type ServiceOrderMaxAggregateOutputType = {
   service_name: string | null
   amount: number | null
   due_date: Date | null
-  service_status: string | null
+  service_status: $Enums.ServiceStatus | null
   note_issued: boolean | null
   notified: boolean | null
   notification_count: number | null
@@ -239,7 +239,7 @@ export type ServiceOrderGroupByOutputType = {
   service_name: string
   amount: number
   due_date: Date
-  service_status: string
+  service_status: $Enums.ServiceStatus
   note_issued: boolean
   notified: boolean
   notification_count: number
@@ -277,7 +277,7 @@ export type ServiceOrderWhereInput = {
   service_name?: Prisma.StringFilter<"ServiceOrder"> | string
   amount?: Prisma.IntFilter<"ServiceOrder"> | number
   due_date?: Prisma.DateTimeFilter<"ServiceOrder"> | Date | string
-  service_status?: Prisma.StringFilter<"ServiceOrder"> | string
+  service_status?: Prisma.EnumServiceStatusFilter<"ServiceOrder"> | $Enums.ServiceStatus
   note_issued?: Prisma.BoolFilter<"ServiceOrder"> | boolean
   notified?: Prisma.BoolFilter<"ServiceOrder"> | boolean
   notification_count?: Prisma.IntFilter<"ServiceOrder"> | number
@@ -312,7 +312,7 @@ export type ServiceOrderWhereUniqueInput = Prisma.AtLeast<{
   service_name?: Prisma.StringFilter<"ServiceOrder"> | string
   amount?: Prisma.IntFilter<"ServiceOrder"> | number
   due_date?: Prisma.DateTimeFilter<"ServiceOrder"> | Date | string
-  service_status?: Prisma.StringFilter<"ServiceOrder"> | string
+  service_status?: Prisma.EnumServiceStatusFilter<"ServiceOrder"> | $Enums.ServiceStatus
   note_issued?: Prisma.BoolFilter<"ServiceOrder"> | boolean
   notified?: Prisma.BoolFilter<"ServiceOrder"> | boolean
   notification_count?: Prisma.IntFilter<"ServiceOrder"> | number
@@ -351,7 +351,7 @@ export type ServiceOrderScalarWhereWithAggregatesInput = {
   service_name?: Prisma.StringWithAggregatesFilter<"ServiceOrder"> | string
   amount?: Prisma.IntWithAggregatesFilter<"ServiceOrder"> | number
   due_date?: Prisma.DateTimeWithAggregatesFilter<"ServiceOrder"> | Date | string
-  service_status?: Prisma.StringWithAggregatesFilter<"ServiceOrder"> | string
+  service_status?: Prisma.EnumServiceStatusWithAggregatesFilter<"ServiceOrder"> | $Enums.ServiceStatus
   note_issued?: Prisma.BoolWithAggregatesFilter<"ServiceOrder"> | boolean
   notified?: Prisma.BoolWithAggregatesFilter<"ServiceOrder"> | boolean
   notification_count?: Prisma.IntWithAggregatesFilter<"ServiceOrder"> | number
@@ -364,7 +364,7 @@ export type ServiceOrderCreateInput = {
   service_name: string
   amount: number
   due_date: Date | string
-  service_status?: string
+  service_status?: $Enums.ServiceStatus
   note_issued?: boolean
   notified?: boolean
   notification_count?: number
@@ -380,7 +380,7 @@ export type ServiceOrderUncheckedCreateInput = {
   service_name: string
   amount: number
   due_date: Date | string
-  service_status?: string
+  service_status?: $Enums.ServiceStatus
   note_issued?: boolean
   notified?: boolean
   notification_count?: number
@@ -393,7 +393,7 @@ export type ServiceOrderUpdateInput = {
   service_name?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   due_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  service_status?: Prisma.StringFieldUpdateOperationsInput | string
+  service_status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
   note_issued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notification_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -409,7 +409,7 @@ export type ServiceOrderUncheckedUpdateInput = {
   service_name?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   due_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  service_status?: Prisma.StringFieldUpdateOperationsInput | string
+  service_status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
   note_issued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notification_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -424,7 +424,7 @@ export type ServiceOrderCreateManyInput = {
   service_name: string
   amount: number
   due_date: Date | string
-  service_status?: string
+  service_status?: $Enums.ServiceStatus
   note_issued?: boolean
   notified?: boolean
   notification_count?: number
@@ -437,7 +437,7 @@ export type ServiceOrderUpdateManyMutationInput = {
   service_name?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   due_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  service_status?: Prisma.StringFieldUpdateOperationsInput | string
+  service_status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
   note_issued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notification_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -452,7 +452,7 @@ export type ServiceOrderUncheckedUpdateManyInput = {
   service_name?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   due_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  service_status?: Prisma.StringFieldUpdateOperationsInput | string
+  service_status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
   note_issued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notification_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -572,6 +572,10 @@ export type ServiceOrderUncheckedUpdateManyWithoutCompanyNestedInput = {
   deleteMany?: Prisma.ServiceOrderScalarWhereInput | Prisma.ServiceOrderScalarWhereInput[]
 }
 
+export type EnumServiceStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ServiceStatus
+}
+
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
@@ -580,7 +584,7 @@ export type ServiceOrderCreateWithoutCompanyInput = {
   service_name: string
   amount: number
   due_date: Date | string
-  service_status?: string
+  service_status?: $Enums.ServiceStatus
   note_issued?: boolean
   notified?: boolean
   notification_count?: number
@@ -594,7 +598,7 @@ export type ServiceOrderUncheckedCreateWithoutCompanyInput = {
   service_name: string
   amount: number
   due_date: Date | string
-  service_status?: string
+  service_status?: $Enums.ServiceStatus
   note_issued?: boolean
   notified?: boolean
   notification_count?: number
@@ -638,7 +642,7 @@ export type ServiceOrderScalarWhereInput = {
   service_name?: Prisma.StringFilter<"ServiceOrder"> | string
   amount?: Prisma.IntFilter<"ServiceOrder"> | number
   due_date?: Prisma.DateTimeFilter<"ServiceOrder"> | Date | string
-  service_status?: Prisma.StringFilter<"ServiceOrder"> | string
+  service_status?: Prisma.EnumServiceStatusFilter<"ServiceOrder"> | $Enums.ServiceStatus
   note_issued?: Prisma.BoolFilter<"ServiceOrder"> | boolean
   notified?: Prisma.BoolFilter<"ServiceOrder"> | boolean
   notification_count?: Prisma.IntFilter<"ServiceOrder"> | number
@@ -652,7 +656,7 @@ export type ServiceOrderCreateManyCompanyInput = {
   service_name: string
   amount: number
   due_date: Date | string
-  service_status?: string
+  service_status?: $Enums.ServiceStatus
   note_issued?: boolean
   notified?: boolean
   notification_count?: number
@@ -665,7 +669,7 @@ export type ServiceOrderUpdateWithoutCompanyInput = {
   service_name?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   due_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  service_status?: Prisma.StringFieldUpdateOperationsInput | string
+  service_status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
   note_issued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notification_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -679,7 +683,7 @@ export type ServiceOrderUncheckedUpdateWithoutCompanyInput = {
   service_name?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   due_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  service_status?: Prisma.StringFieldUpdateOperationsInput | string
+  service_status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
   note_issued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notification_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -693,7 +697,7 @@ export type ServiceOrderUncheckedUpdateManyWithoutCompanyInput = {
   service_name?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   due_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  service_status?: Prisma.StringFieldUpdateOperationsInput | string
+  service_status?: Prisma.EnumServiceStatusFieldUpdateOperationsInput | $Enums.ServiceStatus
   note_issued?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notification_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -789,7 +793,7 @@ export type $ServiceOrderPayload<ExtArgs extends runtime.Types.Extensions.Intern
     service_name: string
     amount: number
     due_date: Date
-    service_status: string
+    service_status: $Enums.ServiceStatus
     note_issued: boolean
     notified: boolean
     notification_count: number
@@ -1225,7 +1229,7 @@ export interface ServiceOrderFieldRefs {
   readonly service_name: Prisma.FieldRef<"ServiceOrder", 'String'>
   readonly amount: Prisma.FieldRef<"ServiceOrder", 'Int'>
   readonly due_date: Prisma.FieldRef<"ServiceOrder", 'DateTime'>
-  readonly service_status: Prisma.FieldRef<"ServiceOrder", 'String'>
+  readonly service_status: Prisma.FieldRef<"ServiceOrder", 'ServiceStatus'>
   readonly note_issued: Prisma.FieldRef<"ServiceOrder", 'Boolean'>
   readonly notified: Prisma.FieldRef<"ServiceOrder", 'Boolean'>
   readonly notification_count: Prisma.FieldRef<"ServiceOrder", 'Int'>

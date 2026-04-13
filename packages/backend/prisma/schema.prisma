@@ -10,14 +10,29 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String
+  email         String    @unique
+  password_hash String
+  created_at    DateTime  @default(now())
+  updated_at    DateTime?
+
+  companies     Company[]
+}
+
 model Company {
   id             Int      @id @default(autoincrement())
   name           String
   cnpj           String?  @unique
+  user_id        Int
   created_at     DateTime @default(now())
-  updated_at     DateTime? 
+  updated_at     DateTime?
 
+  user           User           @relation(fields: [user_id], references: [id])
   serviceOrders  ServiceOrder[]
+
+  @@index([user_id])
 }
 
 model ServiceOrder {

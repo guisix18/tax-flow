@@ -7,8 +7,9 @@ import { ServiceOrder, ServiceOrderFilters } from "@/types/serviceOrder";
 export async function getServiceOrders(
   filters: ServiceOrderFilters,
   pagination: PaginationParams,
+  userId: number,
 ): Promise<Result<PaginatedResult<ServiceOrder>>> {
-  const where = buildWhereClause(filters);
+  const where = buildWhereClause(filters, userId);
   const { skip, take } = buildPaginationArgs(pagination);
 
   const [serviceOrders, total] = await Promise.all([

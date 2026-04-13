@@ -18,6 +18,7 @@ export const companyResponseSchema = z.object({
   id: z.number(),
   name: z.string(),
   cnpj: z.string().nullable(),
+  user_id: z.number(),
   created_at: z.date(),
   updated_at: z.date().nullable(),
 });

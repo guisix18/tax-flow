@@ -3,10 +3,12 @@ import { Result } from "@/types/common";
 
 export async function markServiceOrderIssued(
   id: number,
+  userId: number,
 ): Promise<Result<void>> {
-  const serviceOrder = prisma.serviceOrder.findUnique({
+  const serviceOrder = await prisma.serviceOrder.findFirst({
     where: {
       id,
+      company: { user_id: userId },
     },
   });
 
