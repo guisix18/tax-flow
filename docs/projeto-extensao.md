@@ -117,11 +117,10 @@ Dois canais estão previstos:
 
 - `DATABASE_URL` — string de conexão Postgres.
 - `JWT_SECRET` — segredo para assinar tokens JWT. Gerar com `openssl rand -hex 32`.
-- `SMTP_HOST` — servidor SMTP (ex.: `smtp.gmail.com`).
-- `SMTP_PORT` — porta SMTP (default `587`; use `465` para SSL).
-- `SMTP_USER` — usuário/e-mail do provedor (ex.: `conta@gmail.com`).
-- `SMTP_PASS` — senha de aplicativo do provedor (no Gmail, App Password de 16 caracteres).
-- `MAIL_FROM` — remetente exibido no e-mail (opcional; default = `SMTP_USER`).
+- `SMTP_USER` — e-mail Gmail (ex.: `conta@gmail.com`). Também é usado como `from` do envio.
+- `SMTP_PASS` — App Password do Gmail (16 caracteres; gerada em https://myaccount.google.com/apppasswords).
+
+> O host/porta estão fixos no código (`smtp.gmail.com:587`, STARTTLS). Para trocar de provedor no futuro, alterar `packages/backend/src/lib/mailer.ts`.
 
 ### Recursos humanos
 
@@ -203,7 +202,7 @@ Registro, em ordem cronológica reversa, das alterações de código relevantes 
 
 **Arquivos afetados (criados):**
 - `.github/workflows/ci.yml`
-- `packages/backend/src/lib/mailer.ts` — abstração SMTP (singleton de `Transporter`, lê env vars SMTP_HOST/PORT/USER/PASS, suporta porta 465 SSL ou 587 STARTTLS).
+- `packages/backend/src/lib/mailer.ts` — abstração SMTP (singleton de `Transporter`). Host/porta hardcoded para Gmail (`smtp.gmail.com:587`, STARTTLS); só `SMTP_USER` e `SMTP_PASS` vêm do `.env`.
 - `packages/backend/src/services/serviceOrder/sendServiceOrderReminder.ts`
 - `packages/backend/src/__tests__/services/serviceOrder/sendServiceOrderReminder.test.ts`
 
@@ -214,7 +213,7 @@ Registro, em ordem cronológica reversa, das alterações de código relevantes 
 
 **Motivação:** o sistema só entrega valor real quando o usuário recebe o lembrete no canal que ele usa (e-mail). Com o endpoint manual, o amigo PJ pode validar o fluxo completo desde já, e a próxima etapa (job agendado que dispara automaticamente próximo ao vencimento) reaproveita toda essa infraestrutura. O CI, por sua vez, protege `main` de regressões agora que o projeto já tem várias camadas (multi-tenancy, auth, e-mail) — qualquer PR futuro roda os 26 testes antes do merge.
 
-**Variáveis de ambiente novas:** `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` (opcional). Para Gmail, é necessário habilitar 2FA e gerar uma **App Password** em https://myaccount.google.com/apppasswords.
+**Variáveis de ambiente novas:** `SMTP_USER` e `SMTP_PASS` (host/porta fixos para Gmail no código). Para gerar a senha, é necessário ter 2FA ativo na conta Google e criar uma **App Password** em https://myaccount.google.com/apppasswords.
 
 ### 2026-04-13 — Multi-tenancy (auth JWT) + listagem de ordens pendentes
 
