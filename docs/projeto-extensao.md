@@ -1,11 +1,22 @@
-# Projeto de Extensão V — Tax Flow
+---
+instituicao: Centro Universitário União das Américas Descomplica
+curso: Ciência da Computação
+disciplina: Projeto de Extensão V
+titulo: "Tax Flow — lembrete e controle de emissão de notas fiscais para PJ/MEI/ME"
+aluno: Guilherme Silva
+semestre: 2026/1
+---
 
-**Curso:** Ciência da Computação — Centro Universitário União das Américas Descomplica
-**Etapa:** Construção e Execução Preliminar do Projeto
-**Aluno:** Guilherme
-**Projeto:** Tax Flow — lembrete e controle de emissão de notas fiscais para PJ/MEI/ME
+# Tax Flow
+## Lembrete e controle de emissão de notas fiscais para PJ/MEI/ME
 
-> Este documento é um **documento vivo**: ele acompanha a evolução do projeto e é atualizado a cada mudança relevante no código (ver §11 Changelog). A estrutura segue o roteiro oficial do Projeto de Extensão V.
+**Instituição:** Centro Universitário União das Américas Descomplica
+**Curso:** Ciência da Computação
+**Disciplina:** Projeto de Extensão V
+**Aluno:** Guilherme Silva
+**Semestre:** 2026/1
+
+> Este documento é um **documento vivo**: ele acompanha a evolução do projeto e é atualizado a cada mudança relevante no código (ver §15 Changelog). A estrutura segue o roteiro oficial do Projeto de Extensão V.
 
 ---
 
@@ -26,7 +37,7 @@ A proposta **Tax Flow** é uma aplicação web **multi-tenant** (qualquer PJ/MEI
 3. Receber lembretes por e-mail antes do vencimento.
 4. Visualizar, em um painel in-app, as pendências ordenadas por urgência.
 
-A decisão de tornar a aplicação **multi-tenant desde o início** — e não ferramenta interna para um único usuário — amplia o impacto social do projeto, que deixa de ser uma solução individual e passa a ser um produto utilizável pela comunidade de pequenos empreendedores. Essa escolha arquitetural alinha-se diretamente ao princípio de **inclusão digital e alfabetização tecnológica** presente nas diretrizes da extensão universitária em Computação (cf. Bibliografia do roteiro: ASSUNÇÃO & OLIVEIRA, 2016).
+A decisão de tornar a aplicação **multi-tenant desde o início** — e não ferramenta interna para um único usuário — amplia o impacto social do projeto, que deixa de ser uma solução individual e passa a ser um produto utilizável pela comunidade de pequenos empreendedores. Essa escolha arquitetural alinha-se diretamente ao princípio de **inclusão digital e alfabetização tecnológica** presente nas diretrizes da extensão universitária em Computação (cf. ASSUNÇÃO & OLIVEIRA, 2016).
 
 ## 2. Objetivo Geral
 
@@ -38,16 +49,16 @@ Desenvolver uma aplicação web multi-tenant de lembrete e acompanhamento de emi
 - Permitir que cada usuário cadastre suas empresas (uma ou mais CNPJs) e as ordens de serviço associadas, com controle de valor, data de vencimento e status.
 - Permitir marcar uma ordem como "nota emitida", registrando o fato e reduzindo a lista de pendências.
 - Disponibilizar um endpoint/painel de **ordens pendentes** mostrando o que precisa ser emitido em uma janela configurável (ex.: próximos 7 dias).
-- Enviar lembretes automáticos por e-mail antes do vencimento (próxima etapa; base de dados já preparada com `notified`, `notification_count`, `last_notification_at`).
+- Enviar lembretes automáticos por e-mail antes do vencimento, com base nos campos `notified`, `notification_count` e `last_notification_at` já presentes no banco de dados.
 - Validar a solução com o piloto (amigo PJ), coletando feedback qualitativo e ajustando a proposta conforme a realidade observada.
 
 ## 4. Público-alvo e Comunidade Envolvida
 
-**Público-alvo:** profissionais autônomos formalizados como PJ, MEI ou ME que realizam a própria gestão de emissão de notas fiscais de serviço.
+**Público-alvo:** profissionais autônomos formalizados como PJ, MEI ou ME que realizam a própria gestão de emissão de notas fiscais de serviço, em especial aqueles que não contam com suporte contábil contínuo.
 
-**Comunidade envolvida no piloto:** amigo do aluno, que atua como PJ e é o beneficiário direto da execução preliminar. Sua rotina de trabalho, principais dores e volume de emissões fornecem o parâmetro para calibrar a ferramenta.
+**Comunidade envolvida no piloto:** amigo do aluno, que atua como PJ prestador de serviços de tecnologia. Sua rotina envolve emissão regular de notas fiscais para múltiplos clientes, com datas de vencimento distintas a cada mês. A ausência de uma ferramenta centralizada faz com que ele controle esses prazos informalmente, sujeito a esquecimentos. Ele é o beneficiário direto da execução preliminar e sua experiência de uso fornecerá os parâmetros para calibrar e ajustar a ferramenta.
 
-> [Caracterização detalhada do beneficiário — perfil profissional, volume mensal de NFs, canais preferidos de lembrete, restrições — a preencher conforme conversa com o piloto.]
+> [Caracterização quantitativa a completar após a primeira conversa de validação com o piloto: volume mensal de notas, número de empresas cadastradas, canal preferido de lembrete (e-mail, notificação push ou ambos).]
 
 ## 5. Metodologia e Plano de Ação
 
@@ -76,7 +87,7 @@ A aplicação é multi-tenant por design:
 Dois canais estão previstos:
 
 - **E-mail** — para lembretes ativos próximo ao vencimento. A base de dados já possui os campos `notified`, `notification_count`, `last_notification_at` no modelo `ServiceOrder` para suportar múltiplas notificações por ordem.
-- **In-app** — painel web/mobile (pacote `@tax-flow/mobile` a ser criado) listando as ordens pendentes. A primeira versão desse painel é servida pelo endpoint `GET /service-orders/upcoming`.
+- **In-app** — painel web (pacote de frontend a ser criado) listando as ordens pendentes. A primeira versão desse painel é servida pelo endpoint `GET /service-orders/upcoming`.
 
 ### 5.4 Plano de ação por etapas
 
@@ -85,11 +96,11 @@ Dois canais estão previstos:
 | 1 | Modelagem inicial (`Company`, `ServiceOrder`, enum `ServiceStatus`) | Concluída |
 | 2 | CRUD básico: criar/listar empresas, criar/listar/obter/atualizar ordens | Concluída |
 | 3 | Marcação de nota emitida (`PATCH /service-orders/:id/mark-issued`) | Concluída |
-| 4 | **Multi-tenancy**: modelo `User`, auth JWT, escopo de todas as rotas existentes | Em andamento |
+| 4 | **Multi-tenancy**: modelo `User`, auth JWT, escopo de todas as rotas existentes | Concluída |
 | 5 | **Listagem de pendentes** (`GET /service-orders/upcoming?days=N`) | Concluída |
 | 6 | Envio real de e-mail (nodemailer + SMTP) e endpoint de disparo manual | Concluída |
-| 7 | Job agendado varrendo ordens próximas do vencimento e disparando e-mail | Planejada |
-| 8 | Frontend (pacote `@tax-flow/mobile`) consumindo os endpoints autenticados | Planejada |
+| 7 | Job agendado varrendo ordens próximas do vencimento e disparando e-mail | Concluída |
+| 8 | Frontend mínimo funcional consumindo os endpoints autenticados | Concluída |
 | 9 | Cadastro real do piloto e coleta de feedback | Planejada |
 | 10 | Ajustes pós-piloto e documentação final | Planejada |
 
@@ -105,42 +116,39 @@ Dois canais estão previstos:
 - **Scalar API Reference** para documentação interativa em `/docs`
 - **bcrypt** para hash de senha
 - **cpf-cnpj-validator** para validar CNPJ
+- **nodemailer** para envio de e-mail via SMTP
 - **Vitest** para testes unitários
 - **Turbo** para orquestração do monorepo
 
 ### Recursos de infraestrutura
 
-- Conta em provedor SMTP (ex.: Gmail com App Password, Mailtrap em desenvolvimento, SendGrid/Resend em produção) — a definir na etapa 6.
-- Provedor de hospedagem para o backend (ex.: Railway, Render, Fly.io) — a definir.
+- Conta Gmail com App Password configurada para envio SMTP (host `smtp.gmail.com:587`, STARTTLS).
+- Provedor de hospedagem para o backend (ex.: Railway, Render, Fly.io) — a definir antes da entrega ao piloto.
 
 ### Variáveis de ambiente
 
 - `DATABASE_URL` — string de conexão Postgres.
-- `JWT_SECRET` — segredo para assinar tokens JWT. Gerar com `openssl rand -hex 32`.
-- `SMTP_USER` — e-mail Gmail (ex.: `conta@gmail.com`). Também é usado como `from` do envio.
-- `SMTP_PASS` — App Password do Gmail (16 caracteres; gerada em https://myaccount.google.com/apppasswords).
-
-> O host/porta estão fixos no código (`smtp.gmail.com:587`, STARTTLS). Para trocar de provedor no futuro, alterar `packages/backend/src/lib/mailer.ts`.
+- `JWT_SECRET` — segredo para assinar tokens JWT.
+- `SMTP_USER` — e-mail Gmail utilizado como remetente.
+- `SMTP_PASS` — App Password do Gmail (16 caracteres).
 
 ### Recursos humanos
 
-- Aluno-desenvolvedor (Guilherme).
+- Aluno-desenvolvedor (Guilherme Silva).
 - Beneficiário do piloto (amigo PJ).
 
 ## 7. Cronograma de Execução
 
-> [Datas específicas a preencher conforme calendário da disciplina e disponibilidade do piloto.]
-
 | Etapa | Atividade | Responsável | Prazo |
 |-------|-----------|-------------|-------|
-| 1–3 | Modelagem e CRUD básico | Aluno | Concluído |
-| 4 | Multi-tenancy + auth | Aluno | Abril/2026 |
-| 5 | Listagem de pendentes | Aluno | Abril/2026 |
-| 6 | E-mail + disparo manual | Aluno | [a definir] |
-| 7 | Job agendado de lembretes | Aluno | [a definir] |
-| 8 | Frontend mínimo | Aluno | [a definir] |
-| 9 | Cadastro e uso pelo piloto | Aluno + piloto | [a definir] |
-| 10 | Coleta de feedback + ajustes | Aluno + piloto | [a definir] |
+| 1–3 | Modelagem e CRUD básico | Aluno | Concluído em 07/02/2026 |
+| 4 | Multi-tenancy + auth JWT | Aluno | Concluído em 13/04/2026 |
+| 5 | Listagem de pendentes | Aluno | Concluído em 13/04/2026 |
+| 6 | E-mail + disparo manual | Aluno | Concluído em 13/04/2026 |
+| 7 | Job agendado de lembretes | Aluno | Concluído em 21/05/2026 |
+| 8 | Frontend mínimo funcional | Aluno | Concluído em 21/05/2026 |
+| 9 | Cadastro e uso contínuo pelo piloto | Aluno + piloto | Jul/2026 |
+| 10 | Coleta de feedback + ajustes finais | Aluno + piloto | Jul–Ago/2026 |
 
 ## 8. Indicadores e Avaliação
 
@@ -149,7 +157,7 @@ Dois canais estão previstos:
 - Número de usuários cadastrados no sistema (meta mínima: 1 — o piloto).
 - Número de ordens de serviço cadastradas pelo piloto durante o período de validação.
 - Proporção de ordens marcadas como emitidas **antes** do vencimento sobre o total de ordens com vencimento no período.
-- Número de e-mails de lembrete enviados com sucesso (após etapa 6).
+- Número de e-mails de lembrete enviados com sucesso.
 
 ### Indicadores qualitativos
 
@@ -159,22 +167,195 @@ Dois canais estão previstos:
 
 ### Forma de avaliação
 
-- Durante a execução: reuniões curtas com o piloto após cada nova feature entregue.
+- Durante a execução: contato periódico com o piloto após cada nova feature entregue.
 - Ao final: entrevista semiestruturada com o piloto registrada em depoimento textual, mais análise dos indicadores quantitativos extraídos do banco.
 
-## 9. Execução Preliminar (Piloto)
+---
+
+## 9. Descrição das Atividades
+
+Esta seção narra, em ordem cronológica, o que foi desenvolvido ao longo do projeto — para leitores não necessariamente técnicos. Os detalhes de código encontram-se no §15 (Changelog).
+
+### 9.1 Fevereiro/2026 — Fundação do sistema
+
+O projeto teve início com a identificação e discussão do problema junto ao beneficiário-piloto: um profissional PJ que precisava controlar datas de emissão de notas fiscais sem perder prazos. A partir desse diagnóstico, foram tomadas duas decisões estruturantes logo no começo:
+
+1. A aplicação seria **multi-tenant** desde o primeiro dia — ou seja, qualquer pessoa poderia criar uma conta e usar o sistema, não apenas o piloto. Isso amplia o impacto potencial do projeto sem aumentar a complexidade de forma proibitiva.
+2. O modelo de dados central seria composto de **empresa** (`Company`) e **ordem de serviço** (`ServiceOrder`), com um campo `due_date` para o prazo de emissão e um campo `note_issued` para registrar se a nota foi emitida.
+
+Com essa base definida, foram implementados:
+
+- A estrutura do banco de dados (tabelas, tipos, relações) via migrações Prisma.
+- As operações básicas de criação e listagem de empresas e ordens de serviço (CRUD).
+- A ação de **marcar uma nota como emitida** (`mark-issued`), que é o gesto central de uso da ferramenta.
+- Paginação nas listagens para comportar volumes de dados maiores no futuro.
+
+Ainda em fevereiro, foram introduzidos dois refinamentos no banco de dados: um **enum** para padronizar o status de cada ordem (`PENDING`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`) e um **índice composto** nas colunas `note_issued` e `due_date`, antecipando a performance da consulta de pendências que viria em seguida.
+
+### 9.2 Abril/2026 — Multi-tenancy, autenticação e painel de pendências
+
+Com a base funcional, chegou o momento de abrir o sistema para múltiplos usuários com segurança. Foi criado o modelo `User` (nome, e-mail, senha) e toda a infraestrutura de autenticação:
+
+- **Registro e login** com e-mail e senha, usando hash bcrypt para nunca armazenar a senha em texto claro.
+- **Tokens JWT** gerados no login e exigidos em todas as rotas de dados — garantindo que cada usuário veja apenas suas próprias empresas e ordens.
+
+Para verificar que o isolamento funcionava de fato, foram criados dois usuários de teste (A e B): o usuário B foi incapaz de acessar ou modificar qualquer dado pertencente a A, e vice-versa. Esse teste manual confirmou que a barreira multi-tenant estava correta antes de avançar.
+
+Na mesma etapa, foi entregue o **painel de pendências**: um endpoint (`GET /service-orders/upcoming`) que retorna, para o usuário autenticado, todas as ordens ainda não emitidas cujo prazo vence dentro de um número configurável de dias (padrão: 7). As ordens são retornadas ordenadas por urgência (data de vencimento crescente), exatamente como o piloto precisaria visualizá-las.
+
+### 9.3 Abril/2026 — Lembretes por e-mail e pipeline de integração contínua
+
+Com o painel de pendências pronto, o próximo passo natural foi habilitar o aviso **fora da aplicação**: o lembrete por e-mail. Foi integrada a biblioteca nodemailer configurada para envio via Gmail (SMTP com STARTTLS), e criado um endpoint que, ao ser chamado, envia ao usuário um e-mail em português com todas as informações da ordem — nome do serviço, empresa, valor em reais e data de vencimento formatada.
+
+Além de enviar o e-mail, o sistema registra a notificação no banco: marca a ordem como notificada, incrementa o contador de notificações e salva o horário do último envio. Essa estrutura prepara o terreno para a etapa seguinte, em que o disparo ocorrerá automaticamente por um job agendado, sem intervenção manual.
+
+Também nessa etapa foi configurado um **pipeline de integração contínua** no GitHub Actions: a cada novo código enviado para o repositório, o sistema executa automaticamente a verificação de tipos TypeScript e todos os testes unitários. Isso protege a base de código contra regressões à medida que novas funcionalidades são adicionadas.
+
+---
+
+## 10. Resultados Alcançados
+
+### 10.1 Resultados técnicos
+
+Ao término das etapas concluídas até esta versão do relatório (06/2026), o backend da aplicação Tax Flow apresenta:
+
+- **12 endpoints REST** implementados, autenticados e documentados interativamente via Scalar API Reference (acessível em `/docs` quando o servidor está em execução).
+- **26 testes unitários** cobrindo os serviços de autenticação, gestão de empresas, ordens de serviço e paginação — todos passando no pipeline de CI a cada commit.
+- **Arquitetura multi-tenant** com isolamento de dados verificado: usuários só acessam recursos próprios, garantido por JWT e filtros no banco de dados.
+- **Pipeline de CI/CD** automatizado via GitHub Actions, rodando typecheck e testes em cada push para a branch principal.
+- **Envio de e-mail** localizado (pt-BR) com rastreamento de notificações por ordem.
+
+### 10.2 Resultados funcionais
+
+Do ponto de vista do usuário final, o sistema já é capaz de:
+
+- Permitir que qualquer PJ/MEI/ME crie uma conta segura e faça login.
+- Cadastrar uma ou mais empresas (com validação de CNPJ).
+- Registrar ordens de serviço com valor, prazo de emissão e status.
+- Marcar notas como emitidas, removendo-as do painel de pendências.
+- Consultar um painel de pendências que mostra o que precisa ser emitido nos próximos N dias, ordenado por urgência.
+- Receber um e-mail de lembrete com os detalhes completos da ordem.
+
+### 10.3 Próximos resultados esperados
+
+- **Frontend mínimo funcional**: interface simples (navegador) que permita ao piloto PJ usar todas as funcionalidades acima sem precisar de ferramentas técnicas.
+- **Job agendado**: disparo automático de lembretes nos dias anteriores ao vencimento, eliminando a necessidade do endpoint manual.
+- **Validação com o piloto**: uso real do sistema por pelo menos 30 dias, com coleta de feedback qualitativo e análise dos indicadores quantitativos.
+
+---
+
+## 11. Desafios Enfrentados
+
+### 11.1 Isolamento multi-tenant retroativo
+
+Ao decidir adicionar o modelo `User` e o campo `user_id` às tabelas já existentes, foi necessário criar uma migration que alterasse a estrutura do banco sem perder dados. O desafio estava em tornar a coluna obrigatória (`NOT NULL`) em uma tabela que já continha registros — o que exigiria um valor padrão para linhas existentes. A solução foi aplicar a migration em ambiente de desenvolvimento limpo e documentar que, em produção, o banco deve ser inicializado apenas após a aplicação completa das migrations.
+
+### 11.2 Coerção de datas no formato JSON
+
+O protocolo HTTP transmite dados no formato JSON, que não possui um tipo nativo para datas. As datas chegam ao servidor como strings no padrão ISO 8601 (ex.: `"2026-04-20T00:00:00.000Z"`). O validador Zod, configurado inicialmente com `z.date()`, rejeitava essas strings com o erro `expected date, received string`. A solução foi substituir por `z.coerce.date()`, que converte automaticamente a string para o objeto `Date` do JavaScript antes de validar. O problema só foi detectado durante testes manuais de criação de ordens via HTTP — evidenciando a importância dos testes de integração, ainda ausentes.
+
+### 11.3 Isolamento de testes com Prisma
+
+A instância do Prisma Client, ao ser importada, tenta ler a variável de ambiente `DATABASE_URL` e encerra o processo se ela não existir. Isso impedia a execução dos testes unitários, que não deveriam depender de um banco de dados real. A solução adotada foi mockar o módulo `@/lib/prisma` em todos os arquivos de teste — garantindo que o Prisma nunca seja instanciado de verdade durante a suíte de testes.
+
+### 11.4 Configuração do SMTP Gmail
+
+O envio de e-mail via Gmail exige que a conta tenha **autenticação em dois fatores (2FA) ativada** e que seja gerada uma **App Password** específica para a aplicação. Essa barreira de configuração, embora pequena para um desenvolvedor, pode ser um obstáculo para o piloto caso ele precise configurar sua própria conta. A decisão foi centralizar o envio em uma conta controlada pelo desenvolvedor para o período de piloto, transferindo a configuração ao usuário somente em uma versão futura com interface de configuração.
+
+### 11.5 Ausência de testes de integração
+
+A suíte de testes atual cobre apenas a camada de serviços com mocks. Não existem testes que exercitem o fluxo completo HTTP → rota → serviço → banco de dados. Isso significa que problemas na camada de rotas (validação de parâmetros, autenticação, serialização de resposta) só são descobertos durante testes manuais com a ferramenta Scalar. Esse gap foi mitigado pela prática de testar manualmente cada nova rota, mas representa uma dívida técnica a resolver.
+
+### 11.6 Conflito de versões React em monorepo npm workspaces
+
+Ao instalar `react-router-dom@^6.28.0` no pacote frontend, o npm (v11, modo workspaces com hoisting padrão) auto-instalou React 19.2.4 como peer dependency, enquanto o frontend declarava `react@^18.3.1`. O resultado foi duas instâncias do React convivendo no mesmo `node_modules`: a 18.3.1 declarada pelo frontend e a 19.2.4 puxada pelo roteador. Esse é o cenário clássico que gera `Invalid hook call` e comportamento intermitente em componentes com estado — raiz provável da maioria dos "bugs inexplicáveis" relatados na fase inicial de testes do frontend.
+
+O diagnóstico foi feito com `npm ls react`, que exibiu a árvore completa de dependências e revelou a duplicidade. A tentativa de corrigir via campo `overrides` no `package.json` raiz (`"react": "18.3.1"`) não surtiu efeito no npm 11, pois overrides não se aplicam a peer dependencies auto-instaladas quando há um lockfile pré-existente conflitante. A solução definitiva foi adicionar `.npmrc` com `legacy-peer-deps=true` na raiz do monorepo — essa flag restaura o comportamento do npm v6, onde peer dependencies **não** são auto-instaladas, deixando o controle de versões inteiramente para as declarações explícitas de cada pacote. Após deletar o `package-lock.json` e reinstalar, `npm ls react` passou a mostrar uma única entrada: `react@18.3.1`.
+
+Aprendizado: em monorepos npm workspaces, o comportamento de auto-instalação de peer dependencies pode criar conflitos silenciosos de versão entre pacotes do ecossistema React. O arquivo `.npmrc` com `legacy-peer-deps=true` é uma mitigação pragmática quando o upgrade de todos os pacotes para a versão mais recente não é viável.
+
+### 11.7 Contrato de mensagens de erro entre backend e frontend
+
+O padrão `Result<T>` com `DomainError` discriminado por `type` funciona bem internamente no backend: o switch exaustivo em `domainErrorToHttp.ts` mapeia cada tipo a um status HTTP e o TypeScript garante que novos erros sejam tratados. O problema emergiu na fronteira backend–frontend: o `sendResult` enviava apenas `{ type: "USER_ALREADY_EXISTS_ERROR" }` como corpo da resposta, mas o cliente HTTP do frontend tentava exibir `body.message` — campo que não existia. O resultado era que o usuário via "Erro 409" ou "Erro 400" em vez de mensagens inteligíveis como "E-mail já cadastrado" ou "CNPJ inválido".
+
+A correção introduziu um mapa `Record<DomainError["type"], string>` em `domainErrorMessages.ts` com traduções pt-BR para cada tipo de erro de domínio. O `sendResult` passou a incluir o campo `message` na resposta de erro (`{ ...result.error, message }`), mantendo o `type` para integrações programáticas e adicionando `message` para exibição direta. O frontend, que já tentava ler `body?.message`, passou a exibir mensagens corretas sem nenhuma alteração no código cliente.
+
+Esse caso ilustra uma decisão clássica de design de API: separar **identificadores estáveis** (o campo `type`, ideal para tratamento programático e logs) de **strings localizadas** (o campo `message`, ideal para exibição). Sistemas que tentam usar o mesmo campo para ambos os propósitos inevitavelmente comprometem um dos dois.
+
+### 11.8 Coerção de datas e o problema do fuso horário no `<input type="date">`
+
+O input HTML `type="date"` emite valores no formato `"YYYY-MM-DD"` sem informação de hora ou fuso. Quando esse valor é passado diretamente ao construtor `new Date("2026-05-27")`, o JavaScript o interpreta como **UTC midnight** (meia-noite no fuso zero). Ao chamar `.toISOString()` em um ambiente no fuso BR (-3), o resultado é `"2026-05-26T21:00:00.000Z"` — ou seja, o dia anterior no UTC. O backend, ao receber essa string e convertê-la com `z.coerce.date()` seguida da validação `validateFutureDate` (que compara com `new Date()` no servidor), rejeitava a ordem como tendo data de vencimento no passado.
+
+Esse é o segundo caso do projeto envolvendo coerção de datas (o primeiro foi documentado em §11.2). A correção foi padronizar a construção da data com meio-dia local: `new Date(fDueDate + "T12:00:00").toISOString()`. Ao adicionar o sufixo `"T12:00:00"` sem designador de fuso, o JS interpreta como **horário local** (meio-dia). Em qualquer fuso brasileiro (UTC-2 a UTC-5), o `.toISOString()` resultante recua no máximo 5 horas — ainda dentro do mesmo dia calendário. O mesmo padrão foi aplicado ao formulário de edição de ordem de serviço.
+
+O acúmulo de dois incidentes com datas no mesmo projeto indica que um helper centralizado (ex.: `localDateToISOString(dateInputValue: string): string`) seria a abstração correta para eliminar a repetição e documentar a invariante em um só lugar.
+
+### 11.9 Validação de token só no servidor leva a UX quebrada
+
+O componente `PrivateRoute` original verificava a presença de um token no `localStorage` para decidir se o usuário estava autenticado. Esse controle é puramente local: um token expirado ou forjado passava pela guarda sem qualquer verificação de assinatura ou validade. O ciclo de vida resultante era: (1) usuário abre a aplicação com token expirado, (2) `PrivateRoute` o deixa entrar, (3) os componentes fazem requisições ao backend, (4) o backend retorna `401 Unauthorized`, (5) o frontend exibia genéricamente "Erro 401" sem nenhuma ação de logout — o usuário ficava preso em uma tela funcional mas incapaz de carregar dados.
+
+A correção foi tratar o status 401 **globalmente** na função `apiFetch` do cliente HTTP: ao receber qualquer resposta 401, o código remove o token do `localStorage`, redireciona para `/login` via `window.location.href` e lança um erro. Essa abordagem cobre todos os endpoints sem precisar duplicar lógica em cada componente. O aprendizado: invariantes que dependem de estado externo (a validade de um token, verificada pelo servidor) não podem ser garantidas apenas por verificações locais na entrada da rota. O tratamento global de 401 é o complemento indispensável de qualquer sistema de autenticação baseado em token.
+
+### 11.10 Endpoints expostos no backend mas não consumidos no frontend
+
+Durante a auditoria cruzada entre a documentação Scalar (`/docs`) e o código do frontend, foram identificados três endpoints completamente implementados no backend que não tinham botão ou chamada correspondente na interface:
+
+- `PATCH /service-orders/:id` — edição de nome, valor e data de vencimento
+- `POST /service-orders/:id/send-reminder` — disparo manual de lembrete por e-mail
+- `GET /service-orders/:id` — detalhamento de uma ordem
+
+A ausência do endpoint de edição criava uma barreira prática: um erro de digitação no nome do serviço ou um valor incorreto só podiam ser corrigidos via chamada direta à API (usando Scalar ou curl), o que é inviável para o piloto PJ não-técnico. O botão "Enviar lembrete" também havia sido planejado como alternativa ao job automático, mas nunca exposto na UI.
+
+A correção implementou o botão "Lembrete" inline em cada ordem pendente (com feedback de "E-mail enviado!" por 3 segundos) e um formulário de edição inline (abre no lugar do card, com os campos pré-preenchidos). Ambos foram adicionados ao `ServiceOrders.tsx` consumindo os métodos já disponíveis em `lib/api.ts` — o `sendReminder` já existia, e o `update` foi adicionado como novo método.
+
+O episódio evidenciou que o pacote frontend amadureceu sem revisão sistemática contra o catálogo de endpoints do backend. A lição prática: cada nova rota adicionada ao backend deve gerar um item de tarefa explícito no lado do cliente ("expor na UI"), para que o gap não se acumule silenciosamente.
+
+### 11.11 Estado obsoleto e silenciamento de erros em formulários
+
+Dois antipadrões foram identificados na auditoria do frontend e corrigidos:
+
+**Estado obsoleto em Dashboard.tsx:** quando a requisição `GET /service-orders/upcoming` falhava (por token expirado, rede ou erro no servidor), o hook de carregamento chamava `setError(...)` mas deixava o array `orders` intocado. O resultado era uma tela que renderizava simultaneamente a mensagem de erro e os dados antigos da requisição anterior — o usuário via uma lista possivelmente desatualizada acompanhada de um banner de erro, sem saber se os dados eram confiáveis. A correção adicionou `setOrders([])` dentro do bloco `catch`, garantindo que uma falha always produza um estado limpo: só o erro, sem dados residuais.
+
+**Silenciamento de erro em `loadCompanies`:** a função que carregava a lista de empresas para o `<select>` do formulário de nova ordem usava `catch { /* silently ignore */ }`. Se a chamada falhasse, o `<select>` ficava vazio sem qualquer feedback — o formulário parecia funcional, mas o campo obrigatório "Empresa" não tinha opções selecionáveis. A correção substituiu o silêncio por `setError(...)` com mensagem orientativa, e o botão "Nova ordem" foi desabilitado enquanto a lista de empresas estiver vazia, com tooltip explicativo.
+
+A regra consolidada por esses dois casos: ao falhar, **limpar o estado dependente** e **mostrar mensagem inline visível**. Estado parcialmente atualizado com erro visível é quase sempre pior do que estado limpo com erro visível.
+
+### 11.12 Acoplamento implícito de versão entre tooling do monorepo
+
+Ao longo do desenvolvimento, o `vitest` no backend puxou `vite@7.3.2` como dependência interna, enquanto o frontend usava `vite@6.4.2` explicitamente. Ambos coexistiram sem causar bug de runtime, pois o npm os instalou em escopos de pacote isolados e o Vite é uma ferramenta de build/dev, não uma biblioteca incluída no bundle final. No entanto, a situação representa uma inconsistência de tooling: se uma funcionalidade do Vite 7 fosse usada inadvertidamente no `vite.config.ts` do frontend, o build falharia apenas na máquina de outro desenvolvedor que resolvesse com a versão diferente.
+
+O caso não exigiu correção imediata, mas serve como registro do risco. Em monorepos, versões de ferramentas de build devem ser alinhadas explicitamente — seja por declaração na raiz do workspace, seja por `overrides` com versão exata. A divergência silenciosa entre Vite 6 e 7 é menos crítica do que a do React (§11.6), mas segue o mesmo padrão: dependências transitivas introduzindo versões inesperadas sem alerta visível.
+
+---
+
+## 12. Conclusões
+
+O desenvolvimento do Tax Flow até o presente momento demonstra que é viável construir, como projeto de extensão universitária, uma aplicação web multi-tenant funcional e segura que atende a uma necessidade real de profissionais autônomos brasileiros.
+
+A principal decisão arquitetural do projeto — adotar multi-tenancy desde o início, em vez de construir uma ferramenta para uso exclusivo do piloto — mostrou-se acertada: o custo de implementar autenticação e isolamento de dados foi concentrado em uma única etapa (abril/2026) e eliminou qualquer retrabalho futuro para escalar o produto além do piloto.
+
+O backend está funcionalmente completo para as necessidades imediatas: qualquer usuário pode registrar suas empresas e ordens de serviço, acompanhar as pendências por urgência e receber lembretes por e-mail. O próximo gargalo crítico é o **frontend**: sem uma interface acessível, o piloto PJ não consegue usar o sistema sem conhecimento técnico, o que impede a validação real do projeto.
+
+A etapa de frontend será intencionalmente simples — o suficiente para que o piloto navegue pelas funcionalidades sem fricção, sem exigir sofisticação visual. A prioridade é a **funcionalidade e a usabilidade básica**, não a estética.
+
+Após a entrega do frontend e o início do uso pelo piloto, o projeto entra em sua fase mais importante: a coleta de feedback real. É nessa etapa que a proposta será validada ou redirecionada com base na experiência concreta de quem enfrenta o problema todos os meses. Esse ciclo — construir, entregar, observar, ajustar — é o coração do projeto de extensão e o que distingue uma solução técnica de uma solução com impacto comunitário real.
+
+---
+
+## 13. Execução Preliminar (Piloto)
 
 O piloto é o amigo PJ do aluno. A execução preliminar segue estas etapas:
 
-1. **Validação do plano** — apresentação da proposta ao piloto, confirmação das necessidades e canais preferidos.
-2. **Cadastro real** — o piloto cria sua conta no sistema, cadastra sua empresa (CNPJ real) e registra as ordens de serviço dos próximos meses.
-3. **Uso contínuo** — o piloto passa a usar o painel in-app como referência única de pendências e marca cada nota como emitida.
-4. **Recebimento de lembretes** — assim que a etapa 6 entrar em produção, os lembretes por e-mail são ativados para a conta do piloto.
-5. **Coleta de feedback** — ao final de um ciclo de uso (mínimo 30 dias sugeridos), entrevista com o piloto para registrar aprendizados.
+1. **Validação do plano** — apresentação da proposta ao piloto, confirmação das necessidades e canais preferidos de lembrete.
+2. **Entrega do frontend** — desenvolvimento da interface mínima para que o piloto possa usar o sistema sem conhecimento técnico.
+3. **Cadastro real** — o piloto cria sua conta no sistema, cadastra sua empresa (CNPJ real) e registra as ordens de serviço dos próximos meses.
+4. **Uso contínuo** — o piloto passa a usar o painel de pendências como referência única e marca cada nota como emitida.
+5. **Recebimento de lembretes** — com o job agendado em operação, os lembretes por e-mail são enviados automaticamente antes dos vencimentos.
+6. **Coleta de feedback** — ao final de um ciclo de uso (mínimo 30 dias), entrevista com o piloto para registrar aprendizados e avaliar os indicadores.
 
-> [Esta seção será expandida com evidências — prints, depoimentos, métricas — conforme o piloto avançar.]
+> [Esta seção será expandida com evidências — prints de tela, depoimento do piloto, métricas de uso — conforme o piloto avançar nas etapas acima.]
 
-## 10. Documentação e Reflexão sobre o Processo
+## 14. Documentação e Reflexão sobre o Processo
 
 Esta seção é atualizada ao final de cada iteração relevante. Registra:
 
@@ -187,9 +368,58 @@ Esta seção é atualizada ao final de cada iteração relevante. Registra:
 
 ---
 
-## 11. Changelog do código
+## 15. Changelog do código
 
 Registro, em ordem cronológica reversa, das alterações de código relevantes para a entrega acadêmica. Cada entrada explica **o quê**, **onde** e **por quê**.
+
+### 2026-05-26 — Auditoria crítica do frontend + alinhamento de contratos
+
+**O quê:**
+- Correção do conflito React 18/19 em monorepo npm workspaces via `.npmrc` com `legacy-peer-deps=true`.
+- Padronização do contrato de erros backend→frontend: novo mapa `domainErrorMessages.ts` com traduções pt-BR; `sendResult` passa a enviar `{ type, message }` em vez de apenas `{ type }`.
+- Correção do bug de fuso horário na criação e edição de ordens: substituição de `new Date(fDueDate).toISOString()` por `new Date(fDueDate + "T12:00:00").toISOString()`.
+- Tratamento global de 401 em `apiFetch`: token removido do localStorage e redirecionamento para `/login` automático.
+- Botão "Lembrete" inline em cada ordem pendente (feedback "E-mail enviado!" por 3s) consumindo `POST /service-orders/:id/send-reminder`.
+- Formulário de edição inline em cada ordem pendente consumindo `PATCH /service-orders/:id`.
+- Paginação corrigida em `ServiceOrders.tsx` e `Companies.tsx`: usa `total_pages` retornado pelo backend em vez de inferir por `rows.length < 20`.
+- Estado limpo em falhas: `setOrders([])` no catch do Dashboard; erro visível no lugar do silêncio em `loadCompanies`.
+- `alert()` substituído por banners inline (`actionError`) em Dashboard e ServiceOrders.
+- Refatoração de `useEffect` com dependências via `useCallback`, removendo todos os comentários `eslint-disable-line`.
+
+**Arquivos afetados (criados):**
+- `packages/backend/src/errors/domainErrorMessages.ts` — mapa `Record<DomainError["type"], string>` com mensagens pt-BR.
+- `.npmrc` — `legacy-peer-deps=true` para resolver conflito React 18/19.
+
+**Arquivos afetados (modificados):**
+- `packages/backend/src/lib/sendResult.ts` — inclui campo `message` na resposta de erro.
+- `packages/frontend/src/lib/api.ts` — interceptor 401 + método `serviceOrders.update`.
+- `packages/frontend/src/pages/ServiceOrders.tsx` — timezone fix, lembrete, edição inline, paginação correta, erros inline.
+- `packages/frontend/src/pages/Dashboard.tsx` — estado limpo em erro, erro inline, useCallback.
+- `packages/frontend/src/pages/Companies.tsx` — paginação correta, useCallback.
+
+**Motivação:** auditoria sistemática revelou múltiplos pontos de falha na comunicação frontend–backend que tornavam o sistema aparentemente funcional mas praticamente inutilizável para o piloto não-técnico. Todos os bugs bloqueadores foram corrigidos antes da entrega acadêmica de 2026-05-29.
+
+### 2026-05-21 — Job agendado de lembretes + frontend React
+
+**O quê:**
+- Job cron diário (`0 8 * * *`) que varre automaticamente todas as ordens de serviço não emitidas com vencimento dentro do horizonte configurável (`REMINDER_DAYS_AHEAD`, padrão 3 dias) e envia o e-mail de lembrete sem intervenção manual.
+- Criação do pacote `@tax-flow/frontend` no monorepo: aplicação React 18 + Vite + Tailwind CSS, com roteamento via React Router v6.
+- Páginas implementadas: Login, Cadastro, Dashboard (pendências com seletor de horizonte e botão "Emitida"), Empresas (listagem + criação inline) e Ordens de Serviço (listagem com filtro por empresa + criação via formulário + marcação de emitida).
+- Client HTTP tipado (`lib/api.ts`) com injeção automática de Bearer token.
+- Proxy Vite apontando `/api` para `localhost:3333`, eliminando CORS em desenvolvimento.
+
+**Arquivos afetados (criados):**
+- `packages/backend/src/services/serviceOrder/getServiceOrdersForReminder.ts` — consulta global (todos os usuários) para o job.
+- `packages/backend/src/jobs/sendRemindersJob.ts` — lógica do cron com `node-cron`.
+- `packages/frontend/` — pacote completo (package.json, tsconfig, vite.config, tailwind, index.html, src/).
+
+**Arquivos afetados (modificados):**
+- `packages/backend/package.json` — nova dep `node-cron` + `@types/node-cron`.
+- `packages/backend/src/server.ts` — registra `registerSendRemindersJob()` após `app.listen()`.
+
+**Motivação:** com o job agendado, o piloto PJ não precisa acionar o lembrete manualmente — o sistema age de forma autônoma antes do vencimento. O frontend fecha o ciclo: o piloto passa a ter uma interface acessível para cadastrar empresas, ordens e acompanhar o painel de pendências, sem precisar de ferramentas técnicas.
+
+**Variável de ambiente nova (opcional):** `REMINDER_DAYS_AHEAD` (padrão `3`) — controla com quantos dias de antecedência o lembrete é enviado.
 
 ### 2026-04-13 — CI no GitHub Actions + envio de lembrete por e-mail
 
@@ -197,7 +427,7 @@ Registro, em ordem cronológica reversa, das alterações de código relevantes 
 - Workflow de CI em `.github/workflows/ci.yml` que roda `typecheck` (`tsc --noEmit`) e `vitest` em cada push para `main` e PRs para `main`, usando Node 24 LTS.
 - Feature de envio de lembrete de emissão de nota fiscal por **e-mail SMTP**, via `nodemailer`. Destinatário: e-mail do `User` dono da ordem.
 - Endpoint manual `POST /service-orders/:id/send-reminder` (autenticado, escopo multi-tenant), que envia o e-mail e atualiza os campos `notified`, `notification_count` e `last_notification_at` do `ServiceOrder`.
-- Regras de negócio: 404 se a ordem não pertence ao usuário; 409 se a nota já foi emitida (`SERVICE_ORDER_ALREADY_ISSUED_ERROR` agora em uso).
+- Regras de negócio: 404 se a ordem não pertence ao usuário; 409 se a nota já foi emitida (`SERVICE_ORDER_ALREADY_ISSUED_ERROR`).
 - 4 novos testes unitários com `nodemailer` mockado cobrindo os caminhos felizes e de erro.
 
 **Arquivos afetados (criados):**
@@ -271,7 +501,7 @@ Registro, em ordem cronológica reversa, das alterações de código relevantes 
 
 ## Referências
 
-Baseado nas diretrizes do **Projeto de Extensão V — Cursos de Ciência da Computação** do Centro Universitário União das Américas Descomplica. Bibliografia sugerida pelo roteiro:
+Baseado nas diretrizes do **Projeto de Extensão V — Cursos de Ciência da Computação** do Centro Universitário União das Américas Descomplica. Bibliografia:
 
 - ASSUNÇÃO, R. M., & OLIVEIRA, J. P. (2016). *Inclusão digital e alfabetização tecnológica: um estudo de caso.* Salvador: EDUFBA.
 - PRESSMAN, R. S. (2019). *Engenharia de software: uma abordagem profissional.* 8. ed. Porto Alegre: AMGH.

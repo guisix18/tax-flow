@@ -15,6 +15,9 @@ export function authRoutes(app: FastifyInstance): void {
     "/auth/register",
     {
       schema: {
+        tags: ["Auth"],
+        summary: "Registrar novo usuário",
+        description: "Cria uma conta e retorna um token JWT pronto para uso.",
         body: registerUserSchema,
         response: {
           201: authResponseSchema,
@@ -39,6 +42,9 @@ export function authRoutes(app: FastifyInstance): void {
     "/auth/login",
     {
       schema: {
+        tags: ["Auth"],
+        summary: "Login",
+        description: "Autentica com e-mail e senha e retorna um token JWT.",
         body: loginUserSchema,
         response: {
           200: loginResponseSchema,

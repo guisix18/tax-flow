@@ -5,6 +5,7 @@ import {
   getServiceOrderByIdParamsSchema,
   getServiceOrdersFiltersSchema,
   getUpcomingServiceOrdersQuerySchema,
+  serviceOrderListItemSchema,
   serviceOrdersResponseSchema,
   updateServiceOrderSchema,
 } from "./schemas";
@@ -23,6 +24,10 @@ export function serviceOrderRoutes(app: FastifyInstance): void {
     {
       onRequest: [app.authenticate],
       schema: {
+        tags: ["Ordens de Serviço"],
+        summary: "Criar ordem de serviço",
+        description: "Registra uma nova ordem de serviço vinculada a uma empresa do usuário.",
+        security: [{ bearerAuth: [] }],
         body: createServiceOrderSchema,
         response: {
           201: z.object({ id: z.number() }),
@@ -44,6 +49,10 @@ export function serviceOrderRoutes(app: FastifyInstance): void {
     {
       onRequest: [app.authenticate],
       schema: {
+        tags: ["Ordens de Serviço"],
+        summary: "Listar ordens de serviço",
+        description: "Retorna lista paginada com filtros por empresa, nome, período e status.",
+        security: [{ bearerAuth: [] }],
         querystring: getServiceOrdersFiltersSchema,
         response: {
           200: serviceOrdersResponseSchema,
@@ -67,6 +76,10 @@ export function serviceOrderRoutes(app: FastifyInstance): void {
     {
       onRequest: [app.authenticate],
       schema: {
+        tags: ["Ordens de Serviço"],
+        summary: "Ordens próximas do vencimento",
+        description: "Retorna ordens com `due_date` dentro dos próximos N dias (padrão 7). Útil para o dashboard.",
+        security: [{ bearerAuth: [] }],
         querystring: getUpcomingServiceOrdersQuerySchema,
         response: {
           200: serviceOrdersResponseSchema,
@@ -93,7 +106,14 @@ export function serviceOrderRoutes(app: FastifyInstance): void {
     {
       onRequest: [app.authenticate],
       schema: {
+        tags: ["Ordens de Serviço"],
+        summary: "Buscar ordem por ID",
+        description: "Retorna os dados completos de uma ordem de serviço. Retorna 404 se não pertencer ao usuário.",
+        security: [{ bearerAuth: [] }],
         params: getServiceOrderByIdParamsSchema,
+        response: {
+          200: serviceOrderListItemSchema,
+        },
       },
     },
     async (request, reply) => {
@@ -113,8 +133,13 @@ export function serviceOrderRoutes(app: FastifyInstance): void {
     {
       onRequest: [app.authenticate],
       schema: {
+        tags: ["Ordens de Serviço"],
+        summary: "Atualizar ordem de serviço",
+        description: "Atualiza nome, valor ou data de vencimento. Todos os campos são opcionais. Retorna 204.",
+        security: [{ bearerAuth: [] }],
         body: updateServiceOrderSchema,
         params: getServiceOrderByIdParamsSchema,
+        response: { 204: z.void() },
       },
     },
     async (request, reply) => {
@@ -136,7 +161,12 @@ export function serviceOrderRoutes(app: FastifyInstance): void {
     {
       onRequest: [app.authenticate],
       schema: {
+        tags: ["Ordens de Serviço"],
+        summary: "Marcar nota como emitida",
+        description: "Define `note_issued = true`. Após isso, a ordem não recebe mais lembretes automáticos. Retorna 204.",
+        security: [{ bearerAuth: [] }],
         params: getServiceOrderByIdParamsSchema,
+        response: { 204: z.void() },
       },
     },
     async (request, reply) => {
@@ -156,7 +186,12 @@ export function serviceOrderRoutes(app: FastifyInstance): void {
     {
       onRequest: [app.authenticate],
       schema: {
+        tags: ["Ordens de Serviço"],
+        summary: "Enviar lembrete manual por e-mail",
+        description: "Envia imediatamente um e-mail de lembrete ao dono da ordem. Falha se a nota já foi emitida. Retorna 204.",
+        security: [{ bearerAuth: [] }],
         params: getServiceOrderByIdParamsSchema,
+        response: { 204: z.void() },
       },
     },
     async (request, reply) => {

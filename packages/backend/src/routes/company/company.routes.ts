@@ -15,6 +15,10 @@ export function companyRoutes(app: FastifyInstance): void {
     {
       onRequest: [app.authenticate],
       schema: {
+        tags: ["Empresas"],
+        summary: "Listar empresas",
+        description: "Retorna a lista paginada de empresas do usuário autenticado.",
+        security: [{ bearerAuth: [] }],
         querystring: getCompaniesQuerySchema,
         response: {
           200: companiesResponseSchema,
@@ -38,6 +42,10 @@ export function companyRoutes(app: FastifyInstance): void {
     {
       onRequest: [app.authenticate],
       schema: {
+        tags: ["Empresas"],
+        summary: "Criar empresa",
+        description: "Cadastra uma nova empresa vinculada ao usuário autenticado.",
+        security: [{ bearerAuth: [] }],
         body: createCompanySchema,
         response: {
           201: z.object({ id: z.number() }),

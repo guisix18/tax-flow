@@ -13,6 +13,7 @@ import errorHandler from "./plugins/errorHandler";
 import authPlugin from "./plugins/auth";
 import { serviceOrderRoutes } from "./routes/serviceOrder/serviceOrder.routes";
 import { authRoutes } from "./routes/auth/auth.routes";
+import { registerSendRemindersJob } from "./jobs/sendRemindersJob";
 
 const app: FastifyInstance = fastify({
   logger: true,
@@ -30,8 +31,17 @@ async function taxFlowBootstrap() {
     openapi: {
       info: {
         title: "Tax Flow API",
-        description: "API for remindering about tax filing deadlines",
+        description: "API para gerenciamento de ordens de serviço e lembretes de emissão de nota fiscal.",
         version: "1.0.0",
+      },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+          },
+        },
       },
     },
     transform: jsonSchemaTransform,
@@ -51,6 +61,8 @@ async function taxFlowBootstrap() {
 
   await app.listen({ port, host: "0.0.0.0" });
   app.log.info(`Server listening on port ${port}`);
+  registerSendRemindersJob();
+  app.log.info("Job de lembretes agendado (diário às 08:00)");
 }
 
 taxFlowBootstrap().catch((err) => {
