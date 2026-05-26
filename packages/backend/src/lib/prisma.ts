@@ -2,20 +2,16 @@ import { loadEnvFile } from "node:process";
 import { PrismaClient } from "../../prisma/generated/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-let connectionString: string;
-
+// Load .env when running locally; in Railway env vars are injected directly.
 try {
   loadEnvFile();
+} catch {
+  // no .env file — running in production environment
+}
 
-  connectionString = process.env.DATABASE_URL as string;
-
-  if (!connectionString) {
-    throw new Error("DATABASE_URL não definida no arquivo .env");
-  }
-
-  console.log("Env carregado com sucesso");
-} catch (error) {
-  console.error("Erro ao carregar o arquivo .env:", error);
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  console.error("DATABASE_URL não definida");
   process.exit(1);
 }
 
