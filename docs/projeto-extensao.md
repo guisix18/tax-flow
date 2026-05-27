@@ -326,6 +326,40 @@ Ao longo do desenvolvimento, o `vitest` no backend puxou `vite@7.3.2` como depen
 
 O caso não exigiu correção imediata, mas serve como registro do risco. Em monorepos, versões de ferramentas de build devem ser alinhadas explicitamente — seja por declaração na raiz do workspace, seja por `overrides` com versão exata. A divergência silenciosa entre Vite 6 e 7 é menos crítica do que a do React (§11.6), mas segue o mesmo padrão: dependências transitivas introduzindo versões inesperadas sem alerta visível.
 
+### 11.13 Deploy em Railway: cadeia de erros em ambiente de produção
+
+O processo de colocar o sistema em produção na plataforma Railway concentrou, em poucas horas, uma sequência de problemas encadeados. Cada erro só aparecia após o anterior ser resolvido — o que é característico de deploy em plataforma nova, onde as suposições do ambiente de desenvolvimento não se traduzem diretamente para produção. Os erros abaixo são registrados em ordem cronológica de ocorrência.
+
+**a) Versão do Node.js não declarada — Railway escolheu Node 18**
+
+O Railway usa o nixpacks para detectar automaticamente a stack e a versão do Node. Sem o campo `engines` no `package.json`, ele escolheu Node 18 como padrão. Prisma 7, Fastify 5, Vite 6 e vários outros pacotes do projeto exigem Node 20+. O Prisma, especificamente, tem um script de pré-instalação que aborta com mensagem explícita ao detectar versão incompatível. A correção foi adicionar `"engines": { "node": ">=20" }` tanto no `package.json` raiz quanto no `packages/frontend/package.json`, garantindo que o nixpacks de cada serviço lesse a restrição correta.
+
+**b) `noEmit: true` no tsconfig impede build de produção**
+
+O tsconfig do backend tinha `"noEmit": true` — uma configuração válida para projetos que usam `tsx` em desenvolvimento, onde o TypeScript serve apenas como typechecker e nunca precisa emitir arquivos. Em produção, porém, `node dist/server.js` precisa de JS compilado. A primeira tentativa de remover `noEmit` e usar `NodeNext` como `moduleResolution` resultou em erros em cascata: TypeScript no modo `NodeNext` exige extensões `.js` explícitas em todos os imports relativos, e o projeto tinha dezenas de imports sem extensão. A solução adotada foi manter o tsconfig com `noEmit: true` para typecheck e adicionar o `tsup` como bundler de produção — o tsup usa esbuild internamente, que resolve path aliases (`@/*`) e imports relativos sem exigir extensões, gerando um único `dist/server.js` de ~38KB.
+
+**c) Binário nativo do Rollup não instalado no Linux**
+
+O `package-lock.json` foi gerado no macOS, que registra os binários opcionais da plataforma macOS (`@rollup/rollup-darwin-arm64`). Ao buildar no Railway (Linux x64), o npm tem um bug antigo onde não instala binários opcionais de plataforma diferente que estão apenas registrados no lockfile — ele simplesmente pula. O Vite depende do Rollup para o bundle de produção, e sem o binário Linux o build do frontend falhava com `Cannot find module @rollup/rollup-linux-x64-gnu`. A correção foi declarar `"@rollup/rollup-linux-x64-gnu"` explicitamente em `optionalDependencies` do `packages/frontend/package.json`, forçando o npm a instalá-lo independente da plataforma.
+
+**d) Working directory errado no monorepo — `prisma migrate deploy` não achava o schema**
+
+O Railway executa os comandos de start a partir do diretório raiz do repositório, mas o schema do Prisma e o `dist/server.js` ficam em `packages/backend/`. O `startCommand` original (`npx prisma migrate deploy && node dist/server.js`) procurava `prisma/schema.prisma` na raiz e falhava. A solução foi mover o `prisma migrate deploy` para dentro do script `start` do próprio `package.json` do backend (`"start": "prisma migrate deploy && node dist/server.js"`) e configurar o Railway para executar `npm run start --workspace=@tax-flow/backend` — o npm workspace command altera o cwd para `packages/backend/` antes de executar o script, resolvendo o problema de diretório.
+
+**e) Variável de ambiente `VITE_API_URL` ausente no build — URL bakeada errada**
+
+O Vite injeta variáveis de ambiente no bundle **em tempo de build**, não em runtime. Na primeira tentativa de deploy, o serviço do frontend foi criado sem a variável `VITE_API_URL` configurada. O build usou o fallback (`http://localhost:3333`) e o bundle foi gerado com essa URL hardcoded. Após configurar a variável no Railway, foi necessário disparar um novo deploy para o Vite recompilar o bundle com a URL correta. Esse comportamento contrasta com variáveis de ambiente em aplicações server-side, onde a var é lida em runtime. Para qualquer variável que começa com `VITE_`, a regra é: ela precisa estar configurada **antes** do build, não antes do start.
+
+**f) `VITE_API_URL` sem protocolo tratada como caminho relativo**
+
+Mesmo após o redeploy com a variável correta, o usuário havia configurado o valor sem o prefixo `https://` (ex: `tax-flowbackend-production.up.railway.app` em vez de `https://tax-flowbackend-production.up.railway.app`). O browser interpretou a string como um caminho relativo e a concatenou ao domínio do próprio frontend, gerando requisições para `https://tax-flowfrontend.../tax-flowbackend.../auth/register`. O servidor do frontend respondeu com o `index.html` (status 200), e o `res.json()` tentou parsear HTML como JSON — gerando a mensagem críptica "The string did not match the expected pattern" do parser JSON do Safari, sem qualquer indicação do problema real. A mitigação foi adicionar lógica no `apiFetch` para auto-prefixar `https://` se a URL não contiver `://`, tornando o comportamento robusto a erros de configuração.
+
+**g) Backend retornando 502 por variável de ambiente ausente**
+
+Após todos os fixes acima, o backend retornava 502 (Application failed to respond). A causa: o plugin de autenticação JWT lança um erro explícito na inicialização se `JWT_SECRET` não estiver definida — e esse erro derruba o processo Fastify antes de ele começar a escutar na porta. O Railway, sem receber resposta no health check, marca o deploy como falho. A correção operacional foi configurar `JWT_SECRET` (e as demais variáveis obrigatórias: `SMTP_USER`, `SMTP_PASS`) no painel do Railway antes do próximo redeploy. O aprendizado arquitetural: variáveis obrigatórias de inicialização devem ser validadas logo no boot com mensagens de erro claras — o que o projeto já fazia, mas a mensagem ficou nos logs do Railway e não foi imediatamente associada ao 502.
+
+A sequência completa ilustra um padrão recorrente em deploys: erros de configuração de ambiente se manifestam como erros de aplicação, e cada camada resolvida revela a próxima. Monorepos adicionam complexidade extra porque os paths e os contextos de execução raramente coincidem com os de desenvolvimento local.
+
 ---
 
 ## 12. Conclusões
