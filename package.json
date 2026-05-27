@@ -17,6 +17,9 @@
     "prisma:migrate": "npm run prisma:migrate --workspace=@tax-flow/backend",
     "prisma:studio": "npm run prisma:studio --workspace=@tax-flow/backend"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "author": "",
   "license": "ISC",
   "devDependencies": {
