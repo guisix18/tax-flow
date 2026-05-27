@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:3333";
+const rawApiUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:3333";
+const API_URL = rawApiUrl.startsWith("http") ? rawApiUrl : `https://${rawApiUrl}`;
 
 function getToken() {
   return localStorage.getItem("token");
