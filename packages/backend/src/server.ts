@@ -49,6 +49,7 @@ async function taxFlowBootstrap() {
   app.register(ScalarApiReference, {
     routePrefix: "/docs",
   });
+  app.get("/health", () => ({ status: "ok" }));
   app.register(errorHandler);
   await app.register(authPlugin);
   app.register(authRoutes);
@@ -64,6 +65,16 @@ async function taxFlowBootstrap() {
   registerSendRemindersJob();
   app.log.info("Job de lembretes agendado (diário às 08:00)");
 }
+
+process.on("unhandledRejection", (reason) => {
+  app.log.error({ reason }, "Unhandled rejection");
+  process.exit(1);
+});
+
+process.on("uncaughtException", (err) => {
+  app.log.error(err, "Uncaught exception");
+  process.exit(1);
+});
 
 taxFlowBootstrap().catch((err) => {
   app.log.error(err);

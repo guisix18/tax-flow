@@ -5,3 +5,5 @@ buildCommand = "npm install && npm run build"
 [deploy]
 startCommand = "npx prisma migrate deploy && node dist/server.js"
 restartPolicyType = "on_failure"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
