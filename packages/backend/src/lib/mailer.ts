@@ -27,11 +27,9 @@ function getTransporter(): Transporter {
   }
 
   cachedTransporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: SMTP_PORT,
+    host: "smtp.gmail.com",
     secure: false, // 587 = STARTTLS
     auth: { user, pass },
-    family: 4,
   } as SMTPTransport.Options);
 
   return cachedTransporter;
