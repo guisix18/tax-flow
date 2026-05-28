@@ -1,4 +1,7 @@
+import dns from "node:dns";
 import { fastify, FastifyInstance } from "fastify";
+
+dns.setDefaultResultOrder("ipv4first");
 import {
   serializerCompiler,
   validatorCompiler,
