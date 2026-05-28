@@ -76,6 +76,10 @@ export const getServiceOrderByIdParamsSchema = z.object({
   id: z.coerce.number(),
 });
 
+export const sendReminderBodySchema = z.object({
+  id: z.number().int().positive(),
+});
+
 export const getUpcomingServiceOrdersQuerySchema = z.object({
   days: z.coerce.number().int().min(1).max(90).default(7),
   page: z.coerce.number().int().positive().default(1),

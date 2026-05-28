@@ -113,7 +113,10 @@ export const serviceOrders = {
   markIssued: (id: number) =>
     apiFetch<void>(`/service-orders/${id}/mark-issued`, { method: "PATCH" }),
   sendReminder: (id: number) =>
-    apiFetch<void>(`/service-orders/${id}/send-reminder`, { method: "POST" }),
+    apiFetch<void>("/service-orders/send-reminder", {
+      method: "POST",
+      body: JSON.stringify({ id }),
+    }),
   update: (
     id: number,
     data: { service_name?: string; amount?: number; due_date?: string },

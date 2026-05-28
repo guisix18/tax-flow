@@ -5,6 +5,7 @@ import {
   getServiceOrderByIdParamsSchema,
   getServiceOrdersFiltersSchema,
   getUpcomingServiceOrdersQuerySchema,
+  sendReminderBodySchema,
   serviceOrderListItemSchema,
   serviceOrdersResponseSchema,
   updateServiceOrderSchema,
@@ -182,7 +183,7 @@ export function serviceOrderRoutes(app: FastifyInstance): void {
   );
 
   app.post(
-    "/service-orders/:id/send-reminder",
+    "/service-orders/send-reminder",
     {
       onRequest: [app.authenticate],
       schema: {
@@ -190,14 +191,12 @@ export function serviceOrderRoutes(app: FastifyInstance): void {
         summary: "Enviar lembrete manual por e-mail",
         description: "Envia imediatamente um e-mail de lembrete ao dono da ordem. Falha se a nota já foi emitida. Retorna 204.",
         security: [{ bearerAuth: [] }],
-        params: getServiceOrderByIdParamsSchema,
+        body: sendReminderBodySchema,
         response: { 204: z.void() },
       },
     },
     async (request, reply) => {
-      const { id } = request.params as z.infer<
-        typeof getServiceOrderByIdParamsSchema
-      >;
+      const { id } = request.body as z.infer<typeof sendReminderBodySchema>;
       const userId = request.user.sub;
 
       const result = await sendServiceOrderReminder(id, userId);
