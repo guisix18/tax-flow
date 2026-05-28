@@ -1,4 +1,5 @@
 import nodemailer, { type Transporter } from "nodemailer";
+import type SMTPTransport from "nodemailer/lib/smtp-transport";
 
 export interface MailPayload {
   to: string;
@@ -30,7 +31,8 @@ function getTransporter(): Transporter {
     port: SMTP_PORT,
     secure: false, // 587 = STARTTLS
     auth: { user, pass },
-  });
+    family: 4,
+  } as SMTPTransport.Options);
 
   return cachedTransporter;
 }
