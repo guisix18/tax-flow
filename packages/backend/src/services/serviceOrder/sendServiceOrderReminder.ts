@@ -60,7 +60,9 @@ export async function sendServiceOrderReminder(
     "— Tax Flow",
   ].join("\n");
 
-  sendMail({ to: user.email, subject, text });
+  sendMail({ to: user.email, subject, text }).catch((err) =>
+    console.error("[sendMail] erro ao enviar lembrete:", err),
+  );
 
   await prisma.serviceOrder.update({
     where: { id: serviceOrder.id },

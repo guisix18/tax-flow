@@ -39,7 +39,7 @@ export async function sendMail(payload: MailPayload): Promise<void> {
   const from = process.env.SMTP_USER;
   const transporter = getTransporter();
 
-  transporter.sendMail({
+  await transporter.sendMail({
     from,
     to: payload.to,
     subject: payload.subject,
