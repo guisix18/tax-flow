@@ -60,7 +60,7 @@ export async function sendServiceOrderReminder(
     "— Tax Flow",
   ].join("\n");
 
-  await sendMail({ to: user.email, subject, text });
+  sendMail({ to: user.email, subject, text });
 
   await prisma.serviceOrder.update({
     where: { id: serviceOrder.id },
