@@ -1,5 +1,4 @@
-import nodemailer, { type Transporter } from "nodemailer";
-import type SMTPTransport from "nodemailer/lib/smtp-transport";
+import { Resend } from "resend";
 
 export interface MailPayload {
   to: string;
@@ -8,46 +7,38 @@ export interface MailPayload {
   html?: string;
 }
 
-// Gmail SMTP fixo — se um dia trocar de provedor, mover host/port para env vars.
-const SMTP_HOST = "smtp.gmail.com";
-const SMTP_PORT = 587;
+let client: Resend | null = null;
 
-let cachedTransporter: Transporter | null = null;
+function getClient(): Resend {
+  if (client) return client;
 
-function getTransporter(): Transporter {
-  if (cachedTransporter) return cachedTransporter;
+  const apiKey = process.env.RESEND_API_KEY;
 
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-
-  if (!user || !pass) {
-    throw new Error(
-      "SMTP_USER e SMTP_PASS devem estar definidos no .env para envio de e-mail",
-    );
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY deve estar definida no .env para envio de e-mail");
   }
 
-  cachedTransporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    auth: { user, pass },
-  } as SMTPTransport.Options);
-
-  return cachedTransporter;
+  client = new Resend(apiKey);
+  return client;
 }
 
 export async function sendMail(payload: MailPayload): Promise<void> {
-  const from = process.env.SMTP_USER;
-  const transporter = getTransporter();
+  const from = process.env.RESEND_FROM ?? "Tax Flow <onboarding@resend.dev>";
+  const resend = getClient();
 
-  await transporter.sendMail({
+  const { error } = await resend.emails.send({
     from,
     to: payload.to,
     subject: payload.subject,
     text: payload.text,
     html: payload.html,
   });
+
+  if (error) {
+    throw new Error(`Resend: ${error.message}`);
+  }
 }
 
-// exposto para testes poderem resetar o transporter cacheado
 export function __resetTransporterForTests(): void {
-  cachedTransporter = null;
+  client = null;
 }

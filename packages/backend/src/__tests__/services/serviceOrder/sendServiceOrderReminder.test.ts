@@ -13,7 +13,7 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 vi.mock("@/lib/mailer", () => ({
-  sendMail: vi.fn(),
+  sendMail: vi.fn().mockResolvedValue(undefined),
 }));
 
 const USER_ID = 42;
@@ -110,15 +110,18 @@ describe("sendServiceOrderReminder", () => {
     expect(prisma.serviceOrder.update).not.toHaveBeenCalled();
   });
 
-  it("propaga erro do transporte SMTP (não silenciosa)", async () => {
+  it("retorna success mesmo se o envio de e-mail falhar (fire-and-forget)", async () => {
     vi.mocked(prisma.serviceOrder.findFirst).mockResolvedValueOnce(
       baseOrder as never,
     );
-    vi.mocked(sendMail).mockRejectedValueOnce(new Error("SMTP fora do ar"));
-
-    await expect(sendServiceOrderReminder(10, USER_ID)).rejects.toThrow(
-      "SMTP fora do ar",
+    vi.mocked(prisma.serviceOrder.update).mockResolvedValueOnce(
+      baseOrder as never,
     );
-    expect(prisma.serviceOrder.update).not.toHaveBeenCalled();
+    vi.mocked(sendMail).mockRejectedValueOnce(new Error("Resend fora do ar"));
+
+    const result = await sendServiceOrderReminder(10, USER_ID);
+
+    expect(result.success).toBe(true);
+    expect(prisma.serviceOrder.update).toHaveBeenCalled();
   });
 });
