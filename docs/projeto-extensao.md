@@ -383,26 +383,28 @@ O desenvolvimento do Tax Flow até o presente momento demonstra que é viável c
 
 A principal decisão arquitetural do projeto — adotar multi-tenancy desde o início, em vez de construir uma ferramenta para uso exclusivo do piloto — mostrou-se acertada: o custo de implementar autenticação e isolamento de dados foi concentrado em uma única etapa (abril/2026) e eliminou qualquer retrabalho futuro para escalar o produto além do piloto.
 
-O backend está funcionalmente completo para as necessidades imediatas: qualquer usuário pode registrar suas empresas e ordens de serviço, acompanhar as pendências por urgência e receber lembretes por e-mail. O próximo gargalo crítico é o **frontend**: sem uma interface acessível, o piloto PJ não consegue usar o sistema sem conhecimento técnico, o que impede a validação real do projeto.
+O sistema está funcionalmente completo e em produção: o piloto criou sua conta, cadastrou sua empresa e suas ordens de serviço, e recebeu lembretes por e-mail confirmando que o fluxo funciona de ponta a ponta. O frontend — intencionalmente simples, focado em funcionalidade e usabilidade básica — cumpriu seu papel de tornar o sistema acessível a um usuário não-técnico sem fricção.
 
-A etapa de frontend será intencionalmente simples — o suficiente para que o piloto navegue pelas funcionalidades sem fricção, sem exigir sofisticação visual. A prioridade é a **funcionalidade e a usabilidade básica**, não a estética.
-
-Após a entrega do frontend e o início do uso pelo piloto, o projeto entra em sua fase mais importante: a coleta de feedback real. É nessa etapa que a proposta será validada ou redirecionada com base na experiência concreta de quem enfrenta o problema todos os meses. Esse ciclo — construir, entregar, observar, ajustar — é o coração do projeto de extensão e o que distingue uma solução técnica de uma solução com impacto comunitário real.
+A próxima fase é a coleta estruturada de feedback após pelo menos 30 dias de uso contínuo. É nessa etapa que a proposta será validada ou redirecionada com base na experiência concreta de quem enfrenta o problema todos os meses. Esse ciclo — construir, entregar, observar, ajustar — é o coração do projeto de extensão e o que distingue uma solução técnica de uma solução com impacto comunitário real.
 
 ---
 
 ## 13. Execução Preliminar (Piloto)
 
-O piloto é o amigo PJ do aluno. A execução preliminar segue estas etapas:
+O piloto é o amigo PJ do aluno, prestador de serviços de tecnologia. A execução preliminar seguiu estas etapas:
 
-1. **Validação do plano** — apresentação da proposta ao piloto, confirmação das necessidades e canais preferidos de lembrete.
-2. **Entrega do frontend** — desenvolvimento da interface mínima para que o piloto possa usar o sistema sem conhecimento técnico.
-3. **Cadastro real** — o piloto cria sua conta no sistema, cadastra sua empresa (CNPJ real) e registra as ordens de serviço dos próximos meses.
-4. **Uso contínuo** — o piloto passa a usar o painel de pendências como referência única e marca cada nota como emitida.
-5. **Recebimento de lembretes** — com o job agendado em operação, os lembretes por e-mail são enviados automaticamente antes dos vencimentos.
-6. **Coleta de feedback** — ao final de um ciclo de uso (mínimo 30 dias), entrevista com o piloto para registrar aprendizados e avaliar os indicadores.
+1. ✅ **Validação do plano** — apresentação da proposta ao piloto, confirmação das necessidades e canais preferidos de lembrete.
+2. ✅ **Entrega do frontend** — desenvolvimento da interface mínima para que o piloto possa usar o sistema sem conhecimento técnico.
+3. ✅ **Cadastro real** — o piloto criou sua conta no sistema, cadastrou sua empresa e registrou ordens de serviço reais.
+4. ✅ **Recebimento de lembretes** — o piloto recebeu e-mails de lembrete via disparo manual (`POST /service-orders/send-reminder`), confirmando o fluxo completo de ponta a ponta.
+5. 🔄 **Uso contínuo** — o piloto utiliza o painel de pendências e marca notas como emitidas conforme o ciclo mensal.
+6. ⏳ **Coleta de feedback estruturada** — ao final de um ciclo completo (mínimo 30 dias), entrevista com o piloto para registrar aprendizados e avaliar os indicadores.
 
-> [Esta seção será expandida com evidências — prints de tela, depoimento do piloto, métricas de uso — conforme o piloto avançar nas etapas acima.]
+> [Prints de tela do piloto utilizando o sistema serão adicionados aqui em versão futura deste documento.]
+
+### Limitação conhecida: job agendado e hibernação do Render
+
+O plano gratuito do Render suspende o serviço após 15 minutos de inatividade. O job cron de lembretes automáticos (`0 8 * * *`) roda dentro do processo Node.js — se o servidor estiver hibernado às 08:00, o disparo não ocorrerá. Para o período de piloto, o disparo manual pelo próprio aluno (via botão "Lembrete" na interface) supre essa limitação. A solução definitiva para produção plena é migrar para um plano pago do Render (que não hiberna) ou externalizar o agendamento para um serviço de cron externo (ex.: cron-job.org, que faz um HTTP GET periódico e mantém o servidor acordado).
 
 ## 14. Documentação e Reflexão sobre o Processo
 
@@ -413,7 +415,11 @@ Esta seção é atualizada ao final de cada iteração relevante. Registra:
 - Aspectos da proposta que precisaram ser ajustados após o piloto.
 - Como essas mudanças fortalecem a viabilidade da execução futura.
 
-> [A preencher a partir da primeira validação com o piloto.]
+**Execução preliminar concluída (maio/2026):** o piloto criou sua conta, cadastrou empresa e ordens reais, e recebeu lembretes por e-mail via disparo manual. O fluxo completo — cadastro → painel de pendências → lembrete por e-mail → marcar como emitida — foi validado em ambiente de produção (Render + PostgreSQL). Feedback inicial positivo: o piloto considerou a interface direta e o lembrete por e-mail útil para o controle mensal de notas.
+
+**Ajuste identificado:** o job cron automático não dispara enquanto o servidor está hibernado (limitação do plano gratuito do Render). Para o ciclo atual do piloto, o disparo é feito manualmente pelo aluno-desenvolvedor via botão na interface. Esse ponto será revisado antes de uma abertura mais ampla do sistema.
+
+> [Depoimento formal do piloto e prints de tela serão adicionados aqui ao final do ciclo de uso de 30 dias.]
 
 ---
 
