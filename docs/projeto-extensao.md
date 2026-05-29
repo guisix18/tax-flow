@@ -402,9 +402,11 @@ O piloto é o amigo PJ do aluno, prestador de serviços de tecnologia. A execuç
 
 > [Prints de tela do piloto utilizando o sistema serão adicionados aqui em versão futura deste documento.]
 
-### Limitação conhecida: job agendado e hibernação do Render
+### Limitação conhecida: hibernação do Render no plano gratuito
 
-O plano gratuito do Render suspende o serviço após 15 minutos de inatividade. O job cron de lembretes automáticos (`0 8 * * *`) roda dentro do processo Node.js — se o servidor estiver hibernado às 08:00, o disparo não ocorrerá. Para o período de piloto, o disparo manual pelo próprio aluno (via botão "Lembrete" na interface) supre essa limitação. A solução definitiva para produção plena é migrar para um plano pago do Render (que não hiberna) ou externalizar o agendamento para um serviço de cron externo (ex.: cron-job.org, que faz um HTTP GET periódico e mantém o servidor acordado).
+O job cron de lembretes automáticos (`0 8 * * *`) **está implementado** e funciona corretamente — ao ser disparado, varre todas as ordens pendentes próximas do vencimento e envia os e-mails. O problema é de infraestrutura: o plano gratuito do Render suspende o processo após 15 minutos sem requisições HTTP. Se o servidor estiver hibernado às 08:00, o processo Node.js não está em execução e o cron simplesmente não dispara.
+
+Para o período de piloto, o disparo manual pelo botão "Lembrete" na interface supre essa limitação. A solução definitiva para produção plena é migrar para um plano pago do Render (que não hiberna) ou externalizar o agendamento para um serviço de cron externo (ex.: cron-job.org), que faz uma requisição HTTP periódica mantendo o servidor ativo.
 
 ## 14. Documentação e Reflexão sobre o Processo
 
@@ -417,7 +419,7 @@ Esta seção é atualizada ao final de cada iteração relevante. Registra:
 
 **Execução preliminar concluída (maio/2026):** o piloto criou sua conta, cadastrou empresa e ordens reais, e recebeu lembretes por e-mail via disparo manual. O fluxo completo — cadastro → painel de pendências → lembrete por e-mail → marcar como emitida — foi validado em ambiente de produção (Render + PostgreSQL). Feedback inicial positivo: o piloto considerou a interface direta e o lembrete por e-mail útil para o controle mensal de notas.
 
-**Ajuste identificado:** o job cron automático não dispara enquanto o servidor está hibernado (limitação do plano gratuito do Render). Para o ciclo atual do piloto, o disparo é feito manualmente pelo aluno-desenvolvedor via botão na interface. Esse ponto será revisado antes de uma abertura mais ampla do sistema.
+**Ajuste identificado:** o job cron automático está implementado e funciona corretamente, mas o plano gratuito do Render hiberna o servidor em períodos de inatividade — se o processo estiver suspenso às 08:00, o disparo não ocorre. Para o ciclo atual do piloto, o disparo é feito manualmente via botão na interface. Esse ponto será revisado antes de uma abertura mais ampla do sistema.
 
 > [Depoimento formal do piloto e prints de tela serão adicionados aqui ao final do ciclo de uso de 30 dias.]
 
