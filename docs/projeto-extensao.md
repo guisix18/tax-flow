@@ -116,21 +116,22 @@ Dois canais estão previstos:
 - **Scalar API Reference** para documentação interativa em `/docs`
 - **bcrypt** para hash de senha
 - **cpf-cnpj-validator** para validar CNPJ
-- **Resend SDK** para envio de e-mail transacional via HTTPS
+- **Mailjet API** para envio de e-mail transacional via HTTPS (sem SDK — chamada REST nativa)
 - **Vitest** para testes unitários
 - **Turbo** para orquestração do monorepo
 
 ### Recursos de infraestrutura
 
-- Conta no **Resend** (resend.com) para envio de e-mail transacional — plano gratuito cobre 3.000 e-mails/mês, suficiente para o piloto.
+- Conta no **Mailjet** (mailjet.com) para envio de e-mail transacional — plano gratuito cobre 200 e-mails/dia e 6.000/mês, suficiente para o piloto. Não exige domínio próprio nem endereço de empresa.
 - Provedor de hospedagem para o backend: **Render** (plano gratuito em uso durante o piloto).
 
 ### Variáveis de ambiente
 
 - `DATABASE_URL` — string de conexão Postgres.
 - `JWT_SECRET` — segredo para assinar tokens JWT.
-- `RESEND_API_KEY` — chave de API do Resend para envio de e-mail.
-- `RESEND_FROM` — endereço remetente (ex.: `Tax Flow <onboarding@resend.dev>`). Em domínio verificado no Resend, pode usar qualquer endereço do domínio.
+- `MAILJET_API_KEY` e `MAILJET_SECRET_KEY` — credenciais da API Mailjet.
+- `MAILJET_FROM_EMAIL` — endereço remetente validado no painel Mailjet (ex.: email do desenvolvedor).
+- `MAILJET_FROM_NAME` — nome exibido como remetente (ex.: `Tax Flow`).
 
 ### Recursos humanos
 
@@ -264,9 +265,15 @@ A primeira implementação de envio de e-mail usou **nodemailer** com SMTP diret
 
 Após adicionar o `await` e o tratamento de erro, o log revelou a causa real: `ENETUNREACH 2607:f8b0:400e:c0d::6c:587` — o Render tentava conectar via **IPv6** ao Gmail, mas não tinha rota de saída disponível para esse protocolo. A tentativa de forçar IPv4 via `dns.setDefaultResultOrder("ipv4first")` do Node.js não surtiu efeito, pois esse mecanismo atua na resolução de nomes mas não na seleção da interface de rede usada pelo socket TCP.
 
-A solução definitiva foi **migrar de nodemailer para a Resend API**: o Resend usa chamadas HTTPS (porta 443, sempre disponível) em vez de SMTP. O módulo `mailer.ts` foi reescrito para usar o SDK oficial do Resend, mantendo a mesma interface (`sendMail(payload)`) — sem mudanças nas camadas de serviço ou nos testes, que mockam `@/lib/mailer`. As variáveis `SMTP_USER` e `SMTP_PASS` foram substituídas por `RESEND_API_KEY`.
+A primeira tentativa de solução foi migrar para a **Resend API** (HTTPS, porta 443). O envio passou a funcionar tecnicamente, mas o plano gratuito do Resend impõe uma restrição: sem um domínio próprio verificado, só é possível enviar para o e-mail cadastrado na conta do desenvolvedor — inviável para enviar lembretes ao e-mail do piloto.
 
-Esse episódio ilustra uma limitação frequente de plataformas de hospedagem gratuitas: o bloqueio de saída SMTP é uma prática padrão para prevenir abuso de spam. Serviços de e-mail transacional (Resend, SendGrid, Mailgun) existem precisamente para contornar essa barreira, e são a escolha correta para qualquer aplicação hospedada em PaaS.
+A segunda tentativa foi o **Brevo** (antigo Sendinblue), descartado por exigir endereço de empresa no cadastro.
+
+A solução adotada foi o **Mailjet**: serviço de e-mail transacional que (a) usa HTTPS, (b) permite validar um endereço de e-mail individual como remetente sem exigir domínio, e (c) tem cadastro sem dados de empresa. O `mailer.ts` foi reescrito usando a API REST do Mailjet via `fetch` nativo do Node.js — sem adicionar nenhuma dependência ao projeto. As variáveis `SMTP_USER`/`SMTP_PASS` foram substituídas por `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, `MAILJET_FROM_EMAIL` e `MAILJET_FROM_NAME`.
+
+**Limitação conhecida — entrega na caixa de spam:** e-mails enviados via Mailjet com um endereço Gmail como remetente (`@gmail.com`) tendem a ser classificados como spam pelos servidores de destino. A razão é técnica: o registro SPF do Gmail autoriza apenas os servidores do próprio Google a enviar e-mails como `@gmail.com`; quando o Mailjet envia em nome desse endereço, a verificação SPF falha e o filtro de spam do destinatário penaliza a mensagem. A mitigação para o período de piloto é pedir ao beneficiário que marque o primeiro e-mail como "não é spam" e adicione o remetente aos contatos — ação que treina o filtro local. A solução definitiva é usar um domínio próprio com registros SPF e DKIM configurados apontando para o Mailjet.
+
+Esse episódio ilustra uma limitação frequente de plataformas de hospedagem gratuitas: o bloqueio de saída SMTP é uma prática padrão para prevenir abuso de spam. Serviços de e-mail transacional (Mailjet, Resend, SendGrid) existem precisamente para contornar essa barreira, mas exigem algum nível de configuração de domínio para garantir entregabilidade plena.
 
 ### 11.5 Ausência de testes de integração
 
@@ -435,7 +442,17 @@ Registro, em ordem cronológica reversa, das alterações de código relevantes 
 
 **Motivação:** o Render (e a maioria dos provedores PaaS) bloqueia conexões SMTP de saída para prevenir spam. A tentativa de forçar IPv4 via `dns.setDefaultResultOrder` não resolveu, pois o bloqueio ocorre na camada de rede, não na resolução DNS. O Resend utiliza HTTPS (porta 443), sempre disponível, e oferece plano gratuito compatível com as necessidades do piloto.
 
-**Variáveis de ambiente alteradas:** `SMTP_USER` e `SMTP_PASS` removidas; `RESEND_API_KEY` obrigatória; `RESEND_FROM` opcional (padrão `Tax Flow <onboarding@resend.dev>`).
+**Variáveis de ambiente alteradas:** `SMTP_USER` e `SMTP_PASS` removidas; introduzidas `RESEND_API_KEY` (depois substituída — ver entrada seguinte) e, na versão final, `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, `MAILJET_FROM_EMAIL` e `MAILJET_FROM_NAME`.
+
+### 2026-05-28 (cont.) — Troca de Resend → Brevo → Mailjet para envio de e-mail
+
+**O quê:** após o Resend bloquear envios a destinatários externos no plano gratuito sem domínio verificado, e o Brevo exigir endereço de empresa no cadastro, o projeto migrou para o **Mailjet**, que aceita cadastro simples e validação de remetente por e-mail individual. O `mailer.ts` foi simplificado para uma função pura sem estado usando `fetch` nativo — eliminando qualquer dependência de SDK de terceiros para envio de e-mail. Os testes continuam passando sem alteração, pois mockam `@/lib/mailer` como uma caixa-preta.
+
+**Limitação registrada:** e-mails enviados com remetente `@gmail.com` via Mailjet podem cair em spam por falha de SPF. Workaround para o piloto: marcar uma vez como "não é spam". Solução definitiva: domínio próprio com SPF/DKIM configurado.
+
+**Arquivos afetados:**
+- `packages/backend/src/lib/mailer.ts` — reescrito com fetch nativo para a API REST do Mailjet.
+- `packages/backend/.env.example` — atualizado com as quatro variáveis do Mailjet.
 
 ---
 
