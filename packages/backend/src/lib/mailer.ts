@@ -1,5 +1,3 @@
-import { Resend } from "resend";
-
 export interface MailPayload {
   to: string;
   subject: string;
@@ -7,38 +5,37 @@ export interface MailPayload {
   html?: string;
 }
 
-let client: Resend | null = null;
-
-function getClient(): Resend {
-  if (client) return client;
-
-  const apiKey = process.env.RESEND_API_KEY;
+export async function sendMail(payload: MailPayload): Promise<void> {
+  const apiKey = process.env.BREVO_API_KEY;
 
   if (!apiKey) {
-    throw new Error("RESEND_API_KEY deve estar definida no .env para envio de e-mail");
+    throw new Error("BREVO_API_KEY deve estar definida no .env para envio de e-mail");
   }
 
-  client = new Resend(apiKey);
-  return client;
-}
+  const fromEmail = process.env.BREVO_FROM_EMAIL ?? "noreply@taxflow.com";
+  const fromName = process.env.BREVO_FROM_NAME ?? "Tax Flow";
 
-export async function sendMail(payload: MailPayload): Promise<void> {
-  const from = process.env.RESEND_FROM ?? "Tax Flow <onboarding@resend.dev>";
-  const resend = getClient();
-
-  const { error } = await resend.emails.send({
-    from,
-    to: payload.to,
-    subject: payload.subject,
-    text: payload.text,
-    html: payload.html,
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "api-key": apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      sender: { email: fromEmail, name: fromName },
+      to: [{ email: payload.to }],
+      subject: payload.subject,
+      textContent: payload.text,
+      htmlContent: payload.html,
+    }),
   });
 
-  if (error) {
-    throw new Error(`Resend: ${error.message}`);
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Brevo ${res.status}: ${body}`);
   }
 }
 
 export function __resetTransporterForTests(): void {
-  client = null;
+  // sem estado a resetar — função pura
 }
