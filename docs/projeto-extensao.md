@@ -86,7 +86,7 @@ A aplicação é multi-tenant por design:
 
 Dois canais estão previstos:
 
-- **E-mail** — para lembretes ativos próximo ao vencimento. A base de dados já possui os campos `notified`, `notification_count`, `last_notification_at` no modelo `ServiceOrder` para suportar múltiplas notificações por ordem.
+- **E-mail** — para lembretes ativos próximo ao vencimento. O envio é feito via **Resend API** (serviço de e-mail transacional), que utiliza HTTPS em vez de SMTP direto — evitando restrições de portas impostas por provedores de nuvem. A base de dados já possui os campos `notified`, `notification_count`, `last_notification_at` no modelo `ServiceOrder` para suportar múltiplas notificações por ordem.
 - **In-app** — painel web (pacote de frontend a ser criado) listando as ordens pendentes. A primeira versão desse painel é servida pelo endpoint `GET /service-orders/upcoming`.
 
 ### 5.4 Plano de ação por etapas
@@ -98,7 +98,7 @@ Dois canais estão previstos:
 | 3 | Marcação de nota emitida (`PATCH /service-orders/:id/mark-issued`) | Concluída |
 | 4 | **Multi-tenancy**: modelo `User`, auth JWT, escopo de todas as rotas existentes | Concluída |
 | 5 | **Listagem de pendentes** (`GET /service-orders/upcoming?days=N`) | Concluída |
-| 6 | Envio real de e-mail (nodemailer + SMTP) e endpoint de disparo manual | Concluída |
+| 6 | Envio real de e-mail (Resend API) e endpoint de disparo manual | Concluída |
 | 7 | Job agendado varrendo ordens próximas do vencimento e disparando e-mail | Concluída |
 | 8 | Frontend mínimo funcional consumindo os endpoints autenticados | Concluída |
 | 9 | Cadastro real do piloto e coleta de feedback | Planejada |
@@ -116,21 +116,21 @@ Dois canais estão previstos:
 - **Scalar API Reference** para documentação interativa em `/docs`
 - **bcrypt** para hash de senha
 - **cpf-cnpj-validator** para validar CNPJ
-- **nodemailer** para envio de e-mail via SMTP
+- **Resend SDK** para envio de e-mail transacional via HTTPS
 - **Vitest** para testes unitários
 - **Turbo** para orquestração do monorepo
 
 ### Recursos de infraestrutura
 
-- Conta Gmail com App Password configurada para envio SMTP (host `smtp.gmail.com:587`, STARTTLS).
-- Provedor de hospedagem para o backend (ex.: Railway, Render, Fly.io) — a definir antes da entrega ao piloto.
+- Conta no **Resend** (resend.com) para envio de e-mail transacional — plano gratuito cobre 3.000 e-mails/mês, suficiente para o piloto.
+- Provedor de hospedagem para o backend: **Render** (plano gratuito em uso durante o piloto).
 
 ### Variáveis de ambiente
 
 - `DATABASE_URL` — string de conexão Postgres.
 - `JWT_SECRET` — segredo para assinar tokens JWT.
-- `SMTP_USER` — e-mail Gmail utilizado como remetente.
-- `SMTP_PASS` — App Password do Gmail (16 caracteres).
+- `RESEND_API_KEY` — chave de API do Resend para envio de e-mail.
+- `RESEND_FROM` — endereço remetente (ex.: `Tax Flow <onboarding@resend.dev>`). Em domínio verificado no Resend, pode usar qualquer endereço do domínio.
 
 ### Recursos humanos
 
@@ -258,9 +258,15 @@ O protocolo HTTP transmite dados no formato JSON, que não possui um tipo nativo
 
 A instância do Prisma Client, ao ser importada, tenta ler a variável de ambiente `DATABASE_URL` e encerra o processo se ela não existir. Isso impedia a execução dos testes unitários, que não deveriam depender de um banco de dados real. A solução adotada foi mockar o módulo `@/lib/prisma` em todos os arquivos de teste — garantindo que o Prisma nunca seja instanciado de verdade durante a suíte de testes.
 
-### 11.4 Configuração do SMTP Gmail
+### 11.4 Configuração do SMTP Gmail e posterior migração para Resend
 
-O envio de e-mail via Gmail exige que a conta tenha **autenticação em dois fatores (2FA) ativada** e que seja gerada uma **App Password** específica para a aplicação. Essa barreira de configuração, embora pequena para um desenvolvedor, pode ser um obstáculo para o piloto caso ele precise configurar sua própria conta. A decisão foi centralizar o envio em uma conta controlada pelo desenvolvedor para o período de piloto, transferindo a configuração ao usuário somente em uma versão futura com interface de configuração.
+A primeira implementação de envio de e-mail usou **nodemailer** com SMTP direto ao Gmail (`smtp.gmail.com:587`, STARTTLS). Em ambiente de desenvolvimento local, o envio funcionava corretamente. Em produção no Render, porém, todas as tentativas de conexão falhavam silenciosamente — sem erro explícito, pois a Promise do `transporter.sendMail()` não era aguardada (`await` faltando), fazendo com que rejeições desaparecessem sem rastreamento.
+
+Após adicionar o `await` e o tratamento de erro, o log revelou a causa real: `ENETUNREACH 2607:f8b0:400e:c0d::6c:587` — o Render tentava conectar via **IPv6** ao Gmail, mas não tinha rota de saída disponível para esse protocolo. A tentativa de forçar IPv4 via `dns.setDefaultResultOrder("ipv4first")` do Node.js não surtiu efeito, pois esse mecanismo atua na resolução de nomes mas não na seleção da interface de rede usada pelo socket TCP.
+
+A solução definitiva foi **migrar de nodemailer para a Resend API**: o Resend usa chamadas HTTPS (porta 443, sempre disponível) em vez de SMTP. O módulo `mailer.ts` foi reescrito para usar o SDK oficial do Resend, mantendo a mesma interface (`sendMail(payload)`) — sem mudanças nas camadas de serviço ou nos testes, que mockam `@/lib/mailer`. As variáveis `SMTP_USER` e `SMTP_PASS` foram substituídas por `RESEND_API_KEY`.
+
+Esse episódio ilustra uma limitação frequente de plataformas de hospedagem gratuitas: o bloqueio de saída SMTP é uma prática padrão para prevenir abuso de spam. Serviços de e-mail transacional (Resend, SendGrid, Mailgun) existem precisamente para contornar essa barreira, e são a escolha correta para qualquer aplicação hospedada em PaaS.
 
 ### 11.5 Ausência de testes de integração
 
@@ -301,7 +307,7 @@ A correção foi tratar o status 401 **globalmente** na função `apiFetch` do c
 Durante a auditoria cruzada entre a documentação Scalar (`/docs`) e o código do frontend, foram identificados três endpoints completamente implementados no backend que não tinham botão ou chamada correspondente na interface:
 
 - `PATCH /service-orders/:id` — edição de nome, valor e data de vencimento
-- `POST /service-orders/:id/send-reminder` — disparo manual de lembrete por e-mail
+- `POST /service-orders/send-reminder` — disparo manual de lembrete por e-mail
 - `GET /service-orders/:id` — detalhamento de uma ordem
 
 A ausência do endpoint de edição criava uma barreira prática: um erro de digitação no nome do serviço ou um valor incorreto só podiam ser corrigidos via chamada direta à API (usando Scalar ou curl), o que é inviável para o piloto PJ não-técnico. O botão "Enviar lembrete" também havia sido planejado como alternativa ao job automático, mas nunca exposto na UI.
@@ -356,9 +362,11 @@ Mesmo após o redeploy com a variável correta, o usuário havia configurado o v
 
 **g) Backend retornando 502 por variável de ambiente ausente**
 
-Após todos os fixes acima, o backend retornava 502 (Application failed to respond). A causa: o plugin de autenticação JWT lança um erro explícito na inicialização se `JWT_SECRET` não estiver definida — e esse erro derruba o processo Fastify antes de ele começar a escutar na porta. O Railway, sem receber resposta no health check, marca o deploy como falho. A correção operacional foi configurar `JWT_SECRET` (e as demais variáveis obrigatórias: `SMTP_USER`, `SMTP_PASS`) no painel do Railway antes do próximo redeploy. O aprendizado arquitetural: variáveis obrigatórias de inicialização devem ser validadas logo no boot com mensagens de erro claras — o que o projeto já fazia, mas a mensagem ficou nos logs do Railway e não foi imediatamente associada ao 502.
+Após todos os fixes acima, o backend retornava 502 (Application failed to respond). A causa: o plugin de autenticação JWT lança um erro explícito na inicialização se `JWT_SECRET` não estiver definida — e esse erro derruba o processo Fastify antes de ele começar a escutar na porta. O Railway, sem receber resposta no health check, marca o deploy como falho. A correção operacional foi configurar `JWT_SECRET` (e as demais variáveis obrigatórias) no painel antes do próximo redeploy. O aprendizado arquitetural: variáveis obrigatórias de inicialização devem ser validadas logo no boot com mensagens de erro claras — o que o projeto já fazia, mas a mensagem ficou nos logs e não foi imediatamente associada ao 502.
 
 A sequência completa ilustra um padrão recorrente em deploys: erros de configuração de ambiente se manifestam como erros de aplicação, e cada camada resolvida revela a próxima. Monorepos adicionam complexidade extra porque os paths e os contextos de execução raramente coincidem com os de desenvolvimento local.
+
+> **Nota:** após os ajustes iniciais no Railway, o projeto foi migrado para o **Render** (render.com), onde o backend e o frontend são hospedados gratuitamente. A migração não exigiu mudanças no código — apenas a configuração das variáveis de ambiente no novo painel e a atualização de `VITE_API_URL` no frontend para apontar para o domínio Render do backend.
 
 ---
 
@@ -405,6 +413,31 @@ Esta seção é atualizada ao final de cada iteração relevante. Registra:
 ## 15. Changelog do código
 
 Registro, em ordem cronológica reversa, das alterações de código relevantes para a entrega acadêmica. Cada entrada explica **o quê**, **onde** e **por quê**.
+
+### 2026-05-28 — Migração de nodemailer para Resend + refatoração do endpoint de lembrete
+
+**O quê:**
+- Substituição completa do **nodemailer** (SMTP direto) pelo **Resend SDK** no módulo `mailer.ts`. A interface pública (`sendMail(payload)`) foi preservada — sem impacto nas camadas de serviço ou nos testes.
+- Correção do `await` faltando em `transporter.sendMail()`: a Promise era descartada silenciosamente, e qualquer falha de rede ou autenticação desaparecia sem log. Com `await`, erros agora propagam corretamente.
+- Adição de `.catch()` no disparo fire-and-forget de `sendServiceOrderReminder`, garantindo que falhas de envio sejam registradas nos logs sem bloquear a resposta ao cliente (que recebe `204` imediatamente).
+- Refatoração do endpoint de lembrete: de `POST /service-orders/:id/send-reminder` (id na URL) para `POST /service-orders/send-reminder` (id no body `{ id: number }`). Motivação: evitar o erro `Body cannot be empty when content-type is set to 'application/json'` em clientes que enviavam body vazio para uma rota que não esperava body.
+- Frontend atualizado para consumir o novo contrato: `sendReminder(id)` passa a enviar `body: JSON.stringify({ id })` em vez de interpolar o id na URL.
+- Testes ajustados: mock de `sendMail` passa a retornar `Promise.resolve(undefined)` por padrão (em vez de `undefined` puro) para suportar o `.catch()` no caller; o caso de teste de propagação de erro foi reescrito para refletir o comportamento fire-and-forget.
+
+**Arquivos afetados (modificados):**
+- `packages/backend/src/lib/mailer.ts` — reescrito com Resend SDK; remove imports de nodemailer e SMTPTransport.
+- `packages/backend/src/routes/serviceOrder/serviceOrder.routes.ts` — rota `POST /service-orders/send-reminder` com `body: sendReminderBodySchema`.
+- `packages/backend/src/routes/serviceOrder/schemas.ts` — novo `sendReminderBodySchema = z.object({ id: z.number().int().positive() })`.
+- `packages/backend/src/__tests__/services/serviceOrder/sendServiceOrderReminder.test.ts` — mock e caso de erro atualizados.
+- `packages/frontend/src/lib/api.ts` — `sendReminder` usa body JSON em vez de URL param.
+- `packages/backend/.env.example` — `SMTP_USER`/`SMTP_PASS` substituídas por `RESEND_API_KEY`/`RESEND_FROM`.
+- `packages/backend/package.json` — remove `nodemailer` e `@types/nodemailer`; adiciona `resend`.
+
+**Motivação:** o Render (e a maioria dos provedores PaaS) bloqueia conexões SMTP de saída para prevenir spam. A tentativa de forçar IPv4 via `dns.setDefaultResultOrder` não resolveu, pois o bloqueio ocorre na camada de rede, não na resolução DNS. O Resend utiliza HTTPS (porta 443), sempre disponível, e oferece plano gratuito compatível com as necessidades do piloto.
+
+**Variáveis de ambiente alteradas:** `SMTP_USER` e `SMTP_PASS` removidas; `RESEND_API_KEY` obrigatória; `RESEND_FROM` opcional (padrão `Tax Flow <onboarding@resend.dev>`).
+
+---
 
 ### 2026-05-26 — Auditoria crítica do frontend + alinhamento de contratos
 
