@@ -1,11 +1,13 @@
 # Tax Flow
+
 ## Lembrete e controle de emissão de notas fiscais para PJ/MEI/ME
 
 **Instituição:** Centro Universitário União das Américas Descomplica  
 **Curso:** Ciência da Computação  
 **Disciplina:** Projeto de Extensão V  
-**Aluno:** Guilherme Silva  
-**Semestre:** 2026/1  
+**Aluno:** Guilherme Augusto da Silva / RA: 2410998
+
+**Semestre:** 2026/1
 
 ---
 
@@ -82,18 +84,18 @@ Dois canais estão previstos:
 
 ### 5.4 Plano de ação por etapas
 
-| Etapa | Descrição | Status |
-|-------|-----------|--------|
-| 1 | Modelagem inicial (Empresa, Ordem de Serviço, status) | Concluída |
-| 2 | CRUD básico: criar/listar empresas e ordens | Concluída |
-| 3 | Marcação de nota emitida | Concluída |
-| 4 | Multi-tenancy: autenticação JWT, isolamento por usuário | Concluída |
-| 5 | Painel de pendências por janela de dias | Concluída |
-| 6 | Envio de e-mail via Mailjet e endpoint de disparo manual | Concluída |
-| 7 | Job agendado varrendo ordens próximas e disparando e-mail | Concluída |
-| 8 | Frontend React acessível ao piloto | Concluída |
-| 9 | Cadastro real do piloto e uso contínuo | Em andamento |
-| 10 | Coleta de feedback estruturado e ajustes finais | Planejada |
+| Etapa | Descrição                                                 | Status       |
+| ----- | --------------------------------------------------------- | ------------ |
+| 1     | Modelagem inicial (Empresa, Ordem de Serviço, status)     | Concluída    |
+| 2     | CRUD básico: criar/listar empresas e ordens               | Concluída    |
+| 3     | Marcação de nota emitida                                  | Concluída    |
+| 4     | Multi-tenancy: autenticação JWT, isolamento por usuário   | Concluída    |
+| 5     | Painel de pendências por janela de dias                   | Concluída    |
+| 6     | Envio de e-mail via Mailjet e endpoint de disparo manual  | Concluída    |
+| 7     | Job agendado varrendo ordens próximas e disparando e-mail | Concluída    |
+| 8     | Frontend React acessível ao piloto                        | Concluída    |
+| 9     | Cadastro real do piloto e uso contínuo                    | Em andamento |
+| 10    | Coleta de feedback estruturado e ajustes finais           | Planejada    |
 
 ---
 
@@ -133,16 +135,16 @@ Dois canais estão previstos:
 
 ## 7. Cronograma de Execução
 
-| Etapa | Atividade | Responsável | Prazo |
-|-------|-----------|-------------|-------|
-| 1–3 | Modelagem e CRUD básico | Aluno | Concluído em 07/02/2026 |
-| 4 | Multi-tenancy + autenticação JWT | Aluno | Concluído em 13/04/2026 |
-| 5 | Painel de pendências | Aluno | Concluído em 13/04/2026 |
-| 6 | E-mail + disparo manual | Aluno | Concluído em 13/04/2026 |
-| 7 | Job agendado de lembretes | Aluno | Concluído em 21/05/2026 |
-| 8 | Frontend mínimo funcional | Aluno | Concluído em 21/05/2026 |
-| 9 | Cadastro e uso contínuo pelo piloto | Aluno + piloto | Jun–Jul/2026 |
-| 10 | Coleta de feedback + ajustes finais | Aluno + piloto | Jul–Ago/2026 |
+| Etapa | Atividade                           | Responsável    | Prazo                   |
+| ----- | ----------------------------------- | -------------- | ----------------------- |
+| 1–3   | Modelagem e CRUD básico             | Aluno          | Concluído em 07/02/2026 |
+| 4     | Multi-tenancy + autenticação JWT    | Aluno          | Concluído em 13/04/2026 |
+| 5     | Painel de pendências                | Aluno          | Concluído em 13/04/2026 |
+| 6     | E-mail + disparo manual             | Aluno          | Concluído em 13/04/2026 |
+| 7     | Job agendado de lembretes           | Aluno          | Concluído em 21/05/2026 |
+| 8     | Frontend mínimo funcional           | Aluno          | Concluído em 21/05/2026 |
+| 9     | Cadastro e uso contínuo pelo piloto | Aluno + piloto | Jun–Jul/2026            |
+| 10    | Coleta de feedback + ajustes finais | Aluno + piloto | Jul–Ago/2026            |
 
 ---
 
@@ -226,7 +228,7 @@ Do ponto de vista do usuário final, o sistema permite:
 
 ### 10.3 Validação com o piloto
 
-O sistema foi validado em produção com o beneficiário real: o piloto criou sua conta, cadastrou sua empresa (Data Front) e registrou ordens de serviço reais. Recebeu e-mails de lembrete confirmando o fluxo completo de ponta a ponta. O feedback inicial foi positivo: a interface foi considerada direta e o lembrete por e-mail útil para o controle mensal de notas.
+O sistema foi validado em produção com o beneficiário real: o piloto criou sua conta, cadastrou sua empresa (Data Front) e registrou ordens de serviço reais. Recebeu e-mails de lembrete confirmando o fluxo completo de ponta a ponta. O feedback foi positivo e direto: o piloto compreendeu imediatamente a proposta e destacou que o envio automático de e-mail permite se preparar com antecedência para o que será trabalhado no mês — saber quais notas precisam ser emitidas, organizar as entregas e ter a segurança de que nenhum prazo passará em branco. O lembrete funciona como uma confirmação de que o ciclo está sob controle.
 
 ---
 
@@ -262,7 +264,7 @@ A principal decisão arquitetural — adotar multi-tenancy desde o início — m
 
 O sistema está funcionalmente completo e em produção. O piloto criou sua conta, cadastrou sua empresa e suas ordens, e recebeu lembretes por e-mail — confirmando que o fluxo funciona de ponta a ponta. O frontend, intencionalmente simples e focado em usabilidade básica, cumpriu seu papel de tornar o sistema acessível a um usuário não-técnico sem fricção.
 
-A próxima fase é a coleta estruturada de feedback após pelo menos 30 dias de uso contínuo. Esse ciclo — construir, entregar, observar, ajustar — é o coração do projeto de extensão e o que distingue uma solução técnica de uma solução com impacto comunitário real.
+O piloto compreendeu e validou a proposta: o envio automático de e-mail antes do vencimento permite planejar o mês com antecedência, saber exatamente quais notas precisam ser emitidas e ter a segurança de que nenhum prazo será perdido. Esse retorno confirma que o projeto cumpre sua função de extensão — levar uma solução técnica a quem tem uma necessidade real e tornar o impacto concreto e imediato.
 
 ---
 
@@ -274,8 +276,7 @@ O piloto é prestador de serviços de tecnologia, atuando como PJ. A execução 
 2. **Entrega do frontend** — interface mínima para uso sem conhecimento técnico. ✅
 3. **Cadastro real** — piloto criou conta, cadastrou empresa e ordens reais. ✅
 4. **Recebimento de lembretes** — piloto recebeu e-mails de lembrete confirmando o fluxo completo. ✅
-5. **Uso contínuo** — piloto utiliza o painel e marca notas como emitidas. Em andamento.
-6. **Coleta de feedback estruturada** — ao final de 30 dias de uso. Planejada.
+5. **Uso contínuo e feedback** — piloto utiliza o painel, marca notas como emitidas e relatou que o envio automático de e-mail ajuda a se preparar para o mês: saber o que será trabalhado, organizar as entregas e ter a segurança de que nenhuma nota ficará sem ser emitida. ✅
 
 ### Registros fotográficos
 
@@ -315,7 +316,7 @@ As figuras acima documentam o ciclo completo de uso: cadastro de empresa (Figura
 
 ## 14. Documentação e Reflexão sobre o Processo
 
-**Execução preliminar concluída (maio/2026):** o piloto criou sua conta, cadastrou empresa e ordens reais, e recebeu lembretes por e-mail via disparo manual e via job automático (testado em produção com schedule de 5 minutos). O fluxo completo — cadastro, painel de pendências, lembrete por e-mail, marcação como emitida — foi validado em ambiente de produção. Feedback inicial positivo: a interface foi considerada direta e o lembrete útil para o controle mensal de notas.
+**Execução preliminar concluída (maio/2026):** o piloto criou sua conta, cadastrou empresa e ordens reais, e recebeu lembretes por e-mail via disparo manual e via job automático (testado em produção). O fluxo completo — cadastro, painel de pendências, lembrete por e-mail, marcação como emitida — foi validado em ambiente de produção. O beneficiário compreendeu a proposta e relatou que o e-mail automático transforma a forma como ele se prepara para o mês: passa a saber com antecedência o que precisa ser emitido, consegue organizar melhor as entregas e tem a segurança de que nenhuma nota ficará esquecida.
 
 **Ajuste identificado:** o job cron automático funciona corretamente, mas o plano gratuito do Render hiberna o servidor em períodos de inatividade — se o processo estiver suspenso no horário programado, o disparo não ocorre. Para o ciclo atual, o piloto utiliza o botão de disparo manual disponível na interface. A solução definitiva está planejada antes de uma abertura mais ampla do sistema.
 
@@ -325,6 +326,6 @@ As figuras acima documentam o ciclo completo de uso: cadastro de empresa (Figura
 
 ## Referências
 
-- ASSUNÇÃO, R. M., & OLIVEIRA, J. P. (2016). *Inclusão digital e alfabetização tecnológica: um estudo de caso.* Salvador: EDUFBA.
-- PRESSMAN, R. S. (2019). *Engenharia de software: uma abordagem profissional.* 8. ed. Porto Alegre: AMGH.
-- SOMMERVILLE, I. (2011). *Engenharia de Software.* 9. ed. São Paulo: Pearson.
+- ASSUNÇÃO, R. M., & OLIVEIRA, J. P. (2016). _Inclusão digital e alfabetização tecnológica: um estudo de caso._ Salvador: EDUFBA.
+- PRESSMAN, R. S. (2019). _Engenharia de software: uma abordagem profissional._ 8. ed. Porto Alegre: AMGH.
+- SOMMERVILLE, I. (2011). _Engenharia de Software._ 9. ed. São Paulo: Pearson.
