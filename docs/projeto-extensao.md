@@ -406,6 +406,8 @@ O piloto é o amigo PJ do aluno, prestador de serviços de tecnologia. A execuç
 
 O job cron de lembretes automáticos (`0 8 * * *`) **está implementado** e funciona corretamente — ao ser disparado, varre todas as ordens pendentes próximas do vencimento e envia os e-mails. O problema é de infraestrutura: o plano gratuito do Render suspende o processo após 15 minutos sem requisições HTTP. Se o servidor estiver hibernado às 08:00, o processo Node.js não está em execução e o cron simplesmente não dispara.
 
+Para validar o funcionamento em produção sem depender do horário fixo das 08:00 (que poderia coincidir com a hibernação do servidor), o schedule foi temporariamente alterado para `*/5 * * * *` (a cada 5 minutos) durante a sessão de testes com o piloto. O teste confirmou que o job disparou corretamente, varreu as ordens pendentes e enviou os e-mails. Após a validação, o schedule foi restaurado para `0 8 * * *`.
+
 Para o período de piloto, o disparo manual pelo botão "Lembrete" na interface supre essa limitação. A solução definitiva para produção plena é migrar para um plano pago do Render (que não hiberna) ou externalizar o agendamento para um serviço de cron externo (ex.: cron-job.org), que faz uma requisição HTTP periódica mantendo o servidor ativo.
 
 ## 14. Documentação e Reflexão sobre o Processo

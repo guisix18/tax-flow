@@ -23,8 +23,8 @@ async function run() {
 }
 
 export function registerSendRemindersJob() {
-  // TEMPORÁRIO: a cada 5 minutos para teste em produção
-  cron.schedule("*/5 * * * *", () => {
+  // Executa diariamente às 08:00
+  cron.schedule("0 8 * * *", () => {
     run().catch((err) =>
       console.error("[sendRemindersJob] erro inesperado:", err),
     );
